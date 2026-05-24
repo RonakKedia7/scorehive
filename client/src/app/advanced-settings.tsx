@@ -120,6 +120,8 @@ const AdvancedSettingsScreen = () => {
               keyboardType="numeric"
               className="rounded-xl border border-border-light bg-background px-4 py-3 text-base text-textPrimary"
               style={{ fontSize: 16 }}
+              cursorColor={Colors.primary.DEFAULT}
+              selectionColor={Colors.primary.DEFAULT}
             />
           </View>
 
@@ -175,6 +177,8 @@ const AdvancedSettingsScreen = () => {
               keyboardType="numeric"
               className="rounded-xl border border-border-light bg-background px-4 py-3 text-base text-textPrimary"
               style={{ fontSize: 16 }}
+              cursorColor={Colors.primary.DEFAULT}
+              selectionColor={Colors.primary.DEFAULT}
             />
           </View>
 
@@ -230,6 +234,8 @@ const AdvancedSettingsScreen = () => {
               keyboardType="numeric"
               className="rounded-xl border border-border-light bg-background px-4 py-3 text-base text-textPrimary"
               style={{ fontSize: 16 }}
+              cursorColor={Colors.primary.DEFAULT}
+              selectionColor={Colors.primary.DEFAULT}
             />
           </View>
 

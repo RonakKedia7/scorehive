@@ -70,7 +70,9 @@ export default function HomeScreen() {
       return;
     }
     setError("");
-    console.log("Match Started");
+    router.push({
+      pathname: "/opening-players",
+    });
   };
 
   return (
@@ -112,6 +114,8 @@ export default function HomeScreen() {
               placeholderTextColor={Colors.placeholder}
               className="mb-3 rounded-xl border border-border-light bg-background px-4 py-3 text-base text-textPrimary"
               style={{ fontSize: 16 }}
+              cursorColor={Colors.primary.DEFAULT}
+              selectionColor={Colors.primary.DEFAULT}
             />
 
             <TextInput
@@ -124,6 +128,8 @@ export default function HomeScreen() {
               placeholderTextColor={Colors.placeholder}
               className="rounded-xl border border-border-light bg-background px-4 py-3 text-base text-textPrimary"
               style={{ fontSize: 16 }}
+              cursorColor={Colors.primary.DEFAULT}
+              selectionColor={Colors.primary.DEFAULT}
             />
           </View>
 
@@ -235,6 +241,8 @@ export default function HomeScreen() {
               returnKeyType="done"
               className="rounded-xl border border-border-light bg-background px-4 py-3 text-base text-textPrimary"
               style={{ fontSize: 16 }}
+              cursorColor={Colors.primary.DEFAULT}
+              selectionColor={Colors.primary.DEFAULT}
             />
           </View>
 

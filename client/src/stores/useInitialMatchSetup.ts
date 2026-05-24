@@ -1,5 +1,3 @@
-// stores/useInitialMatchSetup.ts
-
 import { create } from "zustand";
 
 type OptedTo = "bat" | "bowl";
