@@ -64,7 +64,7 @@ const AdvancedSettingsScreen = () => {
       }
     }
     setError("");
-    router.back();
+    router.push("/");
   };
 
   return (

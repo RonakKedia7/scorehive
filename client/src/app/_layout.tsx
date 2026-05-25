@@ -7,6 +7,7 @@ import {
 } from "react-native-reanimated";
 
 import { Colors } from "@/constants/colors";
+import { View } from "react-native";
 
 configureReanimatedLogger({
   level: ReanimatedLogLevel.warn,
@@ -15,14 +16,42 @@ configureReanimatedLogger({
 
 export default function RootLayout() {
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-        contentStyle: {
-          backgroundColor: Colors.background,
-        },
-        animation: "fade",
-      }}
-    />
+    <View className="flex-1 bg-background">
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: {
+            backgroundColor: Colors.background,
+          },
+          animation: "none",
+        }}
+      >
+        <Stack.Screen
+          name="index"
+          options={{
+            animation: "none",
+            presentation: "card",
+          }}
+        />
+        <Stack.Screen
+          name="advanced-settings"
+          options={{
+            animation: "none",
+          }}
+        />
+        <Stack.Screen
+          name="opening-players"
+          options={{
+            animation: "none",
+          }}
+        />
+        <Stack.Screen
+          name="scoring"
+          options={{
+            animation: "none",
+          }}
+        />
+      </Stack>
+    </View>
   );
 }
