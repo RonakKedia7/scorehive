@@ -8,6 +8,7 @@ export type Team = {
 export type Player = {
   id: string;
   name: string;
+  stats: PlayerMatchStats;
 };
 
 export type PlayerMatchStats = {

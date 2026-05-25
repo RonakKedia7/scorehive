@@ -1,4 +1,4 @@
-import { Innings, Player, ScoringStore } from "@/types";
+import { Innings, Player, PlayerMatchStats, ScoringStore } from "@/types";
 import { create } from "zustand";
 import uuid from "react-native-uuid";
 
@@ -29,6 +29,58 @@ const createEmptyInnings = (): Innings => ({
 
   thisOver: [],
 });
+
+const createEmptyStats = (): PlayerMatchStats => ({
+  playerId: "",
+
+  batting: {
+    runs: 0,
+    balls: 0,
+    fours: 0,
+    sixes: 0,
+    strikeRate: 0,
+    isOut: false,
+    dismissalType: undefined,
+  },
+
+  bowling: {
+    overs: 0,
+    balls: 0,
+    maidens: 0,
+    runs: 0,
+    wickets: 0,
+    economy: 0,
+  },
+});
+
+const createPlayer = (name: string): Player => {
+  const id = uuid.v4().toString();
+
+  return {
+    id,
+    name,
+    stats: {
+      playerId: id,
+      batting: {
+        runs: 0,
+        balls: 0,
+        fours: 0,
+        sixes: 0,
+        strikeRate: 0,
+        isOut: false,
+        dismissalType: undefined,
+      },
+      bowling: {
+        overs: 0,
+        balls: 0,
+        maidens: 0,
+        runs: 0,
+        wickets: 0,
+        economy: 0,
+      },
+    },
+  };
+};
 
 const initialState = {
   teamA: {
@@ -62,19 +114,9 @@ export const useScoringStore = create<ScoringStore>((set) => ({
     set((state) => {
       const bowlingTeam = battingTeam === "teamA" ? "teamB" : "teamA";
 
-      const striker: Player = {
-        id: uuid.v4().toString(),
-        name: strikerName,
-      };
-      const nonStriker: Player = {
-        id: uuid.v4().toString(),
-        name: nonStrikerName,
-      };
-
-      const bowler: Player = {
-        id: uuid.v4().toString(),
-        name: bowlerName,
-      };
+      const striker = createPlayer(strikerName);
+      const nonStriker = createPlayer(nonStrikerName);
+      const bowler = createPlayer(bowlerName);
 
       return {
         currentInnings: 1,
