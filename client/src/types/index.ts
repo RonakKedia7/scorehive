@@ -1,8 +1,58 @@
+export type OptedTo = "bat" | "bowl";
+
+export type MatchRules = {
+  playersPerTeam: string;
+
+  noBall: {
+    enabled: boolean;
+    reBall: boolean;
+    runs: string;
+  };
+
+  wide: {
+    enabled: boolean;
+    reBall: boolean;
+    runs: string;
+  };
+};
+
+export type InitialMatchSetupState = {
+  teamA: string;
+  teamB: string;
+
+  tossWonBy: string;
+  optedTo: "" | OptedTo;
+
+  overs: string;
+
+  matchRules: MatchRules;
+
+  setTeamA: (team: string) => void;
+  setTeamB: (team: string) => void;
+
+  setTossWonBy: (team: string) => void;
+  setOptedTo: (option: OptedTo) => void;
+
+  setOvers: (overs: string) => void;
+
+  setPlayersPerTeam: (players: string) => void;
+
+  toggleNoBall: (enabled: boolean) => void;
+  setNoBallReBall: (reBall: boolean) => void;
+  setNoBallRuns: (runs: string) => void;
+
+  toggleWide: (enabled: boolean) => void;
+  setWideReBall: (reBall: boolean) => void;
+  setWideRuns: (runs: string) => void;
+
+  resetMatchSetup: () => void;
+};
+
 export type TeamKey = "teamA" | "teamB";
 
 export type Team = {
   name: string;
-  players: Player[];
+  playersIds: string[];
 };
 
 export type Player = {
@@ -17,27 +67,19 @@ export type PlayerMatchStats = {
   batting: {
     runs: number;
     balls: number;
-
     fours: number;
     sixes: number;
-
     strikeRate: number;
-
     isOut: boolean;
-
     dismissalType?: string;
   };
 
   bowling: {
     overs: number;
     balls: number;
-
     maidens: number;
-
     runs: number;
-
     wickets: number;
-
     economy: number;
   };
 };
@@ -45,7 +87,6 @@ export type PlayerMatchStats = {
 export type Extras = {
   wides: number;
   noBalls: number;
-
   byes: number;
   legByes: number;
 };
@@ -65,14 +106,14 @@ export type Innings = {
 
   currentBowlerId: string | null;
 
-  playersStats: PlayerMatchStats[];
-
   extras: Extras;
 
   thisOver: string[];
 };
 
 export type ScoringStore = {
+  players: Record<string, Player>;
+
   teamA: Team;
   teamB: Team;
 

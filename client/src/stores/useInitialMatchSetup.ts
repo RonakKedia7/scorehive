@@ -1,54 +1,5 @@
+import { InitialMatchSetupState, OptedTo } from "@/types";
 import { create } from "zustand";
-
-type OptedTo = "bat" | "bowl";
-
-type MatchRules = {
-  playersPerTeam: string;
-
-  noBall: {
-    enabled: boolean;
-    reBall: boolean;
-    runs: string;
-  };
-
-  wide: {
-    enabled: boolean;
-    reBall: boolean;
-    runs: string;
-  };
-};
-
-type InitialMatchSetupState = {
-  teamA: string;
-  teamB: string;
-
-  tossWonBy: string;
-  optedTo: "" | OptedTo;
-
-  overs: string;
-
-  matchRules: MatchRules;
-
-  setTeamA: (team: string) => void;
-  setTeamB: (team: string) => void;
-
-  setTossWonBy: (team: string) => void;
-  setOptedTo: (option: OptedTo) => void;
-
-  setOvers: (overs: string) => void;
-
-  setPlayersPerTeam: (players: string) => void;
-
-  toggleNoBall: (enabled: boolean) => void;
-  setNoBallReBall: (reBall: boolean) => void;
-  setNoBallRuns: (runs: string) => void;
-
-  toggleWide: (enabled: boolean) => void;
-  setWideReBall: (reBall: boolean) => void;
-  setWideRuns: (runs: string) => void;
-
-  resetMatchSetup: () => void;
-};
 
 const initialState = {
   teamA: "",

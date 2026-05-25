@@ -4,6 +4,7 @@ import { useInnings } from "@/hooks/useInnings";
 
 const ScoreCard = () => {
   const { innings, currentInnings, teamA, teamB } = useInnings();
+
   const battingTeam = innings.battingTeam === "teamA" ? teamA : teamB;
   const crr =
     innings.overs + innings.balls / 6 > 0
@@ -25,12 +26,12 @@ const ScoreCard = () => {
             </Text>
           </View>
 
-          <View className="bg-background px-4 py-3 rounded-card items-center ">
+          <View className="bg-surface px-4 py-3 rounded-card items-center ">
             <Text className="text-text-tertiary text-[10px] font-bold">
               CURRENT RR
             </Text>
 
-            <Text className="text-primary-500 text-xl font-black mt-0.5">
+            <Text className="text-text-primary text-xl font-black mt-0.5">
               {crr}
             </Text>
           </View>

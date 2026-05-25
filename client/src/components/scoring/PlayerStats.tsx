@@ -3,14 +3,9 @@ import { useMemo } from "react";
 import { View, Text } from "react-native";
 
 const PlayerStats = () => {
-  const { teamA, teamB, innings } = useInnings();
-  const allPlayers = useMemo(
-    () => [...teamA.players, ...teamB.players],
-    [teamA.players, teamB.players],
-  );
+  const { innings, players } = useInnings();
 
-  const findPlayer = (id: string | null) =>
-    allPlayers.find((p) => p.id === id) ?? null;
+  const findPlayer = (id: string | null) => (id ? (players[id] ?? null) : null);
 
   const striker = findPlayer(innings.strikerId);
   const nonStriker = findPlayer(innings.nonStrikerId);
