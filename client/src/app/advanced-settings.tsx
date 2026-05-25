@@ -86,7 +86,7 @@ const AdvancedSettingsScreen = () => {
           <View className="mb-4 flex-row items-center justify-between">
             <Pressable
               onPress={() => router.back()}
-              className="rounded-xl bg-card p-3 active:bg-background"
+              className="rounded-xl bg-surface p-3 active:bg-background"
               style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
             >
               <Ionicons
@@ -96,7 +96,7 @@ const AdvancedSettingsScreen = () => {
               />
             </Pressable>
 
-            <Text className="text-2xl font-extrabold tracking-tight text-textPrimary">
+            <Text className="text-2xl font-extrabold tracking-tight text-text-primary">
               Settings
             </Text>
 
@@ -104,8 +104,8 @@ const AdvancedSettingsScreen = () => {
           </View>
 
           {/* PLAYERS PER TEAM */}
-          <View className="mb-4 rounded-2xl border border-border-light bg-card p-5 shadow-card">
-            <Text className="mb-3 text-lg font-bold text-textPrimary">
+          <View className="mb-4 rounded-2xl border border-border-light bg-surface p-5 shadow-card">
+            <Text className="mb-3 text-lg font-bold text-text-primary">
               Players Per Team
             </Text>
 
@@ -118,7 +118,7 @@ const AdvancedSettingsScreen = () => {
               placeholder="11"
               placeholderTextColor={Colors.placeholder}
               keyboardType="numeric"
-              className="rounded-xl border border-border-light bg-background px-4 py-3 text-base text-textPrimary"
+              className="rounded-xl border border-border-light bg-background px-4 py-3 text-base text-text-primary"
               style={{ fontSize: 16 }}
               cursorColor={Colors.primary.DEFAULT}
               selectionColor={Colors.primary.DEFAULT}
@@ -126,14 +126,14 @@ const AdvancedSettingsScreen = () => {
           </View>
 
           {/* NO BALL */}
-          <View className="mb-4 rounded-2xl border border-border-light bg-card p-5 shadow-card">
-            <Text className="mb-4 text-lg font-bold text-textPrimary">
+          <View className="mb-4 rounded-2xl border border-border-light bg-surface p-5 shadow-card">
+            <Text className="mb-4 text-lg font-bold text-text-primary">
               No Ball
             </Text>
 
             <View className="flex-row items-center justify-between mb-4">
               <View className="flex-row items-center">
-                <Text className="text-base font-medium text-textPrimary">
+                <Text className="text-base font-medium text-text-primary">
                   Enable
                 </Text>
                 <Switch
@@ -143,12 +143,12 @@ const AdvancedSettingsScreen = () => {
                     false: Colors.border.DEFAULT,
                     true: Colors.primary.DEFAULT,
                   }}
-                  thumbColor={Colors.card}
+                  thumbColor={Colors.text.primary}
                 />
               </View>
 
               <View className="flex-row items-center">
-                <Text className="text-base font-medium text-textPrimary">
+                <Text className="text-base font-medium text-text-primary">
                   Re-ball
                 </Text>
                 <Switch
@@ -158,12 +158,12 @@ const AdvancedSettingsScreen = () => {
                     false: Colors.border.DEFAULT,
                     true: Colors.primary.DEFAULT,
                   }}
-                  thumbColor={Colors.card}
+                  thumbColor={Colors.text.primary}
                 />
               </View>
             </View>
 
-            <Text className="mb-2 text-base font-medium text-textPrimary">
+            <Text className="mb-2 text-base font-medium text-text-primary">
               Runs
             </Text>
             <TextInput
@@ -175,7 +175,7 @@ const AdvancedSettingsScreen = () => {
               placeholder="1"
               placeholderTextColor={Colors.placeholder}
               keyboardType="numeric"
-              className="rounded-xl border border-border-light bg-background px-4 py-3 text-base text-textPrimary"
+              className="rounded-xl border border-border-light bg-background px-4 py-3 text-base text-text-primary"
               style={{ fontSize: 16 }}
               cursorColor={Colors.primary.DEFAULT}
               selectionColor={Colors.primary.DEFAULT}
@@ -183,14 +183,14 @@ const AdvancedSettingsScreen = () => {
           </View>
 
           {/* WIDE BALL */}
-          <View className="mb-6 rounded-2xl border border-border-light bg-card p-5 shadow-card">
-            <Text className="mb-4 text-lg font-bold text-textPrimary">
+          <View className="mb-6 rounded-2xl border border-border-light bg-surface p-5 shadow-card">
+            <Text className="mb-4 text-lg font-bold text-text-primary">
               Wide Ball
             </Text>
 
             <View className="flex-row items-center justify-between mb-4">
               <View className="flex-row items-center">
-                <Text className="text-base font-medium text-textPrimary">
+                <Text className="text-base font-medium text-text-primary">
                   Enable
                 </Text>
                 <Switch
@@ -200,12 +200,12 @@ const AdvancedSettingsScreen = () => {
                     false: Colors.border.DEFAULT,
                     true: Colors.primary.DEFAULT,
                   }}
-                  thumbColor="#FFFFFF"
+                  thumbColor={Colors.text.primary}
                 />
               </View>
 
               <View className="flex-row items-center">
-                <Text className="text-base font-medium text-textPrimary">
+                <Text className="text-base font-medium text-text-primary">
                   Re-ball
                 </Text>
                 <Switch
@@ -215,12 +215,12 @@ const AdvancedSettingsScreen = () => {
                     false: Colors.border.DEFAULT,
                     true: Colors.primary.DEFAULT,
                   }}
-                  thumbColor="#FFFFFF"
+                  thumbColor={Colors.text.primary}
                 />
               </View>
             </View>
 
-            <Text className="mb-2 text-base font-medium text-textPrimary">
+            <Text className="mb-2 text-base font-medium text-text-primary">
               Runs
             </Text>
             <TextInput
@@ -232,7 +232,7 @@ const AdvancedSettingsScreen = () => {
               placeholder="1"
               placeholderTextColor={Colors.placeholder}
               keyboardType="numeric"
-              className="rounded-xl border border-border-light bg-background px-4 py-3 text-base text-textPrimary"
+              className="rounded-xl border border-border-light bg-background px-4 py-3 text-base text-text-primary"
               style={{ fontSize: 16 }}
               cursorColor={Colors.primary.DEFAULT}
               selectionColor={Colors.primary.DEFAULT}

@@ -92,15 +92,15 @@ export default function HomeScreen() {
         >
           {/* HEADER */}
           <View className="mb-5">
-            <Text className="text-4xl font-extrabold tracking-tight text-textPrimary">
+            <Text className="text-4xl font-extrabold tracking-tight text-text-primary">
               Create Match
             </Text>
             <View className="mt-2 h-1 w-16 rounded-full bg-primary" />
           </View>
 
           {/* TEAM NAMES */}
-          <View className="mb-5 rounded-2xl border border-border-light bg-card p-5 shadow-card">
-            <Text className="mb-3 text-lg font-bold text-textPrimary">
+          <View className="mb-5 rounded-2xl border border-border-light bg-surface p-5 shadow-card">
+            <Text className="mb-3 text-lg font-bold text-text-primary">
               Teams
             </Text>
 
@@ -112,7 +112,7 @@ export default function HomeScreen() {
               }}
               placeholder="Team A"
               placeholderTextColor={Colors.placeholder}
-              className="mb-3 rounded-xl border border-border-light bg-background px-4 py-3 text-base text-textPrimary"
+              className="mb-3 rounded-xl border border-border-light bg-background px-4 py-3 text-base text-text-primary"
               style={{ fontSize: 16 }}
               cursorColor={Colors.primary.DEFAULT}
               selectionColor={Colors.primary.DEFAULT}
@@ -126,7 +126,7 @@ export default function HomeScreen() {
               }}
               placeholder="Team B"
               placeholderTextColor={Colors.placeholder}
-              className="rounded-xl border border-border-light bg-background px-4 py-3 text-base text-textPrimary"
+              className="rounded-xl border border-border-light bg-background px-4 py-3 text-base text-text-primary"
               style={{ fontSize: 16 }}
               cursorColor={Colors.primary.DEFAULT}
               selectionColor={Colors.primary.DEFAULT}
@@ -134,8 +134,8 @@ export default function HomeScreen() {
           </View>
 
           {/* TOSS WINNER */}
-          <View className="mb-5 rounded-2xl border border-border-light bg-card p-5 shadow-card">
-            <Text className="mb-3 text-lg font-bold text-textPrimary">
+          <View className="mb-5 rounded-2xl border border-border-light bg-surface p-5 shadow-card">
+            <Text className="mb-3 text-lg font-bold text-text-primary">
               Toss Winner
             </Text>
 
@@ -151,7 +151,7 @@ export default function HomeScreen() {
               >
                 <Text
                   className={`text-base font-bold ${
-                    tossWonBy === "teamA" ? "text-primary" : "text-textPrimary"
+                    tossWonBy === "teamA" ? "text-primary" : "text-text-primary"
                   }`}
                 >
                   {teamA || "Team A"}
@@ -169,7 +169,7 @@ export default function HomeScreen() {
               >
                 <Text
                   className={`text-base font-bold ${
-                    tossWonBy === "teamB" ? "text-primary" : "text-textPrimary"
+                    tossWonBy === "teamB" ? "text-primary" : "text-text-primary"
                   }`}
                 >
                   {teamB || "Team B"}
@@ -179,8 +179,8 @@ export default function HomeScreen() {
           </View>
 
           {/* DECISION */}
-          <View className="mb-5 rounded-2xl border border-border-light bg-card p-5 shadow-card">
-            <Text className="mb-3 text-lg font-bold text-textPrimary">
+          <View className="mb-5 rounded-2xl border border-border-light bg-surface p-5 shadow-card">
+            <Text className="mb-3 text-lg font-bold text-text-primary">
               Decision
             </Text>
 
@@ -196,7 +196,7 @@ export default function HomeScreen() {
               >
                 <Text
                   className={`text-base font-bold ${
-                    optedTo === "bat" ? "text-primary" : "text-textPrimary"
+                    optedTo === "bat" ? "text-primary" : "text-text-primary"
                   }`}
                 >
                   Bat
@@ -214,7 +214,7 @@ export default function HomeScreen() {
               >
                 <Text
                   className={`text-base font-bold ${
-                    optedTo === "bowl" ? "text-primary" : "text-textPrimary"
+                    optedTo === "bowl" ? "text-primary" : "text-text-primary"
                   }`}
                 >
                   Bowl
@@ -224,8 +224,8 @@ export default function HomeScreen() {
           </View>
 
           {/* TOTAL OVERS */}
-          <View className="mb-6 rounded-2xl border border-border-light bg-card p-5 shadow-card">
-            <Text className="mb-3 text-lg font-bold text-textPrimary">
+          <View className="mb-6 rounded-2xl border border-border-light bg-surface p-5 shadow-card">
+            <Text className="mb-3 text-lg font-bold text-text-primary">
               Total Overs
             </Text>
 
@@ -239,7 +239,7 @@ export default function HomeScreen() {
               placeholderTextColor={Colors.placeholder}
               keyboardType="numeric"
               returnKeyType="done"
-              className="rounded-xl border border-border-light bg-background px-4 py-3 text-base text-textPrimary"
+              className="rounded-xl border border-border-light bg-background px-4 py-3 text-base text-text-primary"
               style={{ fontSize: 16 }}
               cursorColor={Colors.primary.DEFAULT}
               selectionColor={Colors.primary.DEFAULT}
@@ -257,10 +257,10 @@ export default function HomeScreen() {
           <View className="flex-row gap-3">
             <Pressable
               onPress={() => router.push("/advanced-settings")}
-              className="flex-1 items-center rounded-xl border border-border-light bg-card py-4 active:bg-background"
+              className="flex-1 items-center rounded-xl border border-border-light bg-surface py-4 active:bg-background"
               style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}
             >
-              <Text className="text-base font-bold text-textPrimary">
+              <Text className="text-base font-bold text-text-primary">
                 Settings
               </Text>
             </Pressable>

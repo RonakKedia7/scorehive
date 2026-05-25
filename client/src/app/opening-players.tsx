@@ -52,7 +52,7 @@ const OpeningPlayersScreen = () => {
       openingBowlerName: openingBowler.trim(),
     });
 
-    // router.push({ pathname: "/scoring" });
+    router.push({ pathname: "/scoring" });
   };
 
   return (
@@ -61,13 +61,13 @@ const OpeningPlayersScreen = () => {
       <View className="mb-4 flex-row items-center justify-between">
         <Pressable
           onPress={() => router.back()}
-          className="rounded-xl bg-card p-3 active:bg-background"
+          className="rounded-xl bg-surface p-3 active:bg-background"
           style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
         >
           <Ionicons name="arrow-back" size={24} color={Colors.text.primary} />
         </Pressable>
 
-        <Text className="text-2xl font-extrabold tracking-tight text-textPrimary">
+        <Text className="text-2xl font-extrabold tracking-tight text-text-primary">
           Select Opening Players
         </Text>
 
@@ -75,8 +75,10 @@ const OpeningPlayersScreen = () => {
       </View>
 
       {/* INPUTS */}
-      <View className="mb-4 rounded-2xl border border-border-light bg-card p-5 shadow-card">
-        <Text className="mb-3 text-lg font-bold text-textPrimary">Striker</Text>
+      <View className="mb-4 rounded-2xl border border-border-light bg-surface p-5 shadow-card">
+        <Text className="mb-3 text-lg font-bold text-text-primary">
+          Striker
+        </Text>
 
         <TextInput
           value={striker}
@@ -86,7 +88,7 @@ const OpeningPlayersScreen = () => {
           }}
           placeholder="Player name"
           placeholderTextColor={Colors.placeholder}
-          className="rounded-xl border border-border-light bg-background px-4 py-3 text-base text-textPrimary"
+          className="rounded-xl border border-border-light bg-background px-4 py-3 text-base text-text-primary"
           style={{ fontSize: 16 }}
           autoCapitalize="words"
           autoCorrect={false}
@@ -95,8 +97,8 @@ const OpeningPlayersScreen = () => {
           selectionColor={Colors.primary.DEFAULT}
         />
       </View>
-      <View className="mb-4 rounded-2xl border border-border-light bg-card p-5 shadow-card">
-        <Text className="mb-3 text-lg font-bold text-textPrimary">
+      <View className="mb-4 rounded-2xl border border-border-light bg-surface p-5 shadow-card">
+        <Text className="mb-3 text-lg font-bold text-text-primary">
           Non-striker
         </Text>
 
@@ -108,7 +110,7 @@ const OpeningPlayersScreen = () => {
           }}
           placeholder="Player name"
           placeholderTextColor={Colors.placeholder}
-          className="rounded-xl border border-border-light bg-background px-4 py-3 text-base text-textPrimary"
+          className="rounded-xl border border-border-light bg-background px-4 py-3 text-base text-text-primary"
           style={{ fontSize: 16 }}
           autoCapitalize="words"
           autoCorrect={false}
@@ -117,8 +119,8 @@ const OpeningPlayersScreen = () => {
           selectionColor={Colors.primary.DEFAULT}
         />
       </View>
-      <View className="mb-4 rounded-2xl border border-border-light bg-card p-5 shadow-card">
-        <Text className="mb-3 text-lg font-bold text-textPrimary">
+      <View className="mb-4 rounded-2xl border border-border-light bg-surface p-5 shadow-card">
+        <Text className="mb-3 text-lg font-bold text-text-primary">
           Opening bowler
         </Text>
 
@@ -130,7 +132,7 @@ const OpeningPlayersScreen = () => {
           }}
           placeholder="Player name"
           placeholderTextColor={Colors.placeholder}
-          className="rounded-xl border border-border-light bg-background px-4 py-3 text-base text-textPrimary"
+          className="rounded-xl border border-border-light bg-background px-4 py-3 text-base text-text-primary"
           style={{ fontSize: 16 }}
           autoCapitalize="words"
           autoCorrect={false}

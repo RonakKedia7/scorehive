@@ -6,11 +6,23 @@ import {
   ReanimatedLogLevel,
 } from "react-native-reanimated";
 
+import { Colors } from "@/constants/colors";
+
 configureReanimatedLogger({
   level: ReanimatedLogLevel.warn,
-  strict: false, // ← disables the strict mode warnings
+  strict: false,
 });
 
 export default function RootLayout() {
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        contentStyle: {
+          backgroundColor: Colors.background,
+        },
+        animation: "fade",
+      }}
+    />
+  );
 }
