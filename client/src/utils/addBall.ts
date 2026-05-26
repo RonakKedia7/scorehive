@@ -75,11 +75,7 @@ export function parseBallResult(ball: string): ParsedBall {
 
   if (/^\d+$/.test(ball)) {
     const num = Number(ball);
-    return {
-      ...result,
-      runsTotal: num,
-      batterRuns: num,
-    };
+    return { ...result, runsTotal: num, batterRuns: num };
   }
 
   throw new Error(`Invalid ball result: ${ball}`);
@@ -99,10 +95,14 @@ function bowlerRunsConceded(p: ParsedBall): number {
   }
 }
 
+// ---------- Swap helper ----------
+const swapIds = (a: string, b: string): [string, string] => [b, a];
+
 interface AddBallOptions {
   newBatsmanId?: string;
   wicketType?: string;
   newBatsmanName?: string;
+  didBattersCross?: boolean; // for run-out logic
 }
 
 export function addBall(
@@ -114,7 +114,7 @@ export function addBall(
   ballDetail: BallDetail;
   overComplete: boolean;
 } {
-  const { newBatsmanId, wicketType, newBatsmanName } = options;
+  const { newBatsmanId, wicketType, newBatsmanName, didBattersCross } = options;
   const { matchRules } = state;
 
   const parsed = parseBallResult(ballResult);
@@ -144,21 +144,48 @@ export function addBall(
 
   // Adjust for wide rules
   if (parsed.extraType === "wide") {
-    const penalty = parseInt(matchRules.wide.runs, 10) || 0;
+    const penalty = Number(matchRules.wide.runs ?? 1) || 1;
     const enteredRuns = parsed.runsTotal;
     parsed.runsTotal = enteredRuns + penalty;
     parsed.extraRuns = parsed.runsTotal;
     parsed.isLegal = matchRules.wide.reBall ? false : true;
   }
 
+  // --- Select innings and capture initial state ---
   const currentInningsKey =
     state.currentInnings === 1 ? "innings1" : "innings2";
   const innings: Innings = { ...state[currentInningsKey] };
 
+  // ---------- INNINGS OVERFLOW GUARD ----------
+  const battingTeamKey = innings.battingTeam;
+  const battingTeam = battingTeamKey === "teamA" ? state.teamA : state.teamB;
+  const maxWickets = battingTeam.playersIds.length - 1; // all out when this many fall
+
+  if (innings.wickets >= maxWickets) {
+    throw new Error("Innings complete: all out");
+  }
+
+  const totalLegalBalls = innings.overs * 6 + innings.ballsInOver;
+  const maxBalls = state.maxOvers * 6;
+  if (state.maxOvers > 0 && totalLegalBalls >= maxBalls) {
+    throw new Error("Innings complete: overs limit reached");
+  }
+  // -------------------------------------------
+
+  // Capture current positions for scorecard (BEFORE any mutations)
+  const currentOverNumber = innings.overs;
+  const currentBallInOver = innings.ballsInOver; // 0-based
+
+  // Local IDs – we will manipulate these throughout the function
+  let strikerId = innings.strikerId!;
+  let nonStrikerId = innings.nonStrikerId!;
+  const bowlerId = innings.currentBowlerId!;
+
+  // Get player objects for stat updates
   const players = { ...state.players };
-  const striker: Player = { ...players[innings.strikerId!] };
-  const nonStriker: Player = { ...players[innings.nonStrikerId!] };
-  const bowler: Player = { ...players[innings.currentBowlerId!] };
+  const striker: Player = structuredClone(players[strikerId]);
+  const nonStriker: Player = structuredClone(players[nonStrikerId]);
+  const bowler: Player = structuredClone(players[bowlerId]);
 
   // --- Update innings totals and extras ---
   innings.totalRuns += parsed.runsTotal;
@@ -182,13 +209,13 @@ export function addBall(
     innings.extras = extras;
   }
 
-  // Ball counting
+  // Ball counting (legal deliveries)
   if (parsed.isLegal) {
-    innings.balls += 1;
+    innings.ballsInOver += 1;
   }
   innings.thisOver = [...innings.thisOver, ballResult];
 
-  // --- Batsman stats ---
+  // --- Batsman stats (striker only) ---
   if (parsed.isLegal) {
     striker.stats.batting.balls += 1;
   }
@@ -196,22 +223,56 @@ export function addBall(
   if (parsed.batterRuns === 4) striker.stats.batting.fours += 1;
   if (parsed.batterRuns === 6) striker.stats.batting.sixes += 1;
 
-  // --- Wicket ---
+  // --- Wicket handling ---
+  let wicketJustFell = false;
+  let inningsEnded = false;
   if (parsed.isWicket) {
+    wicketJustFell = true;
     innings.wickets += 1;
     striker.stats.batting.isOut = true;
     striker.stats.batting.dismissalType = wicketType ?? "unknown";
 
-    if (!newBatsmanId) {
-      throw new Error("newBatsmanId is required when a wicket falls");
-    }
-    innings.strikerId = newBatsmanId;
+    const isAllOut = innings.wickets >= maxWickets;
+    inningsEnded = isAllOut;
 
-    if (wicketType !== "run out") {
+    if (!isAllOut) {
+      if (!newBatsmanId) {
+        throw new Error("newBatsmanId is required when a wicket falls");
+      }
+      if (!players[newBatsmanId]) {
+        throw new Error(
+          `New batsman ${newBatsmanId} does not exist in players`,
+        );
+      }
+    }
+
+    if (wicketType === "run out") {
+      if (didBattersCross === undefined) {
+        throw new Error("didBattersCross must be provided for run out");
+      }
+      if (!isAllOut) {
+        const nextBatsman = newBatsmanId as string;
+        if (didBattersCross) {
+          strikerId = nonStrikerId;
+          nonStrikerId = nextBatsman;
+        } else {
+          strikerId = nextBatsman;
+        }
+      } else {
+        strikerId = "";
+        nonStrikerId = "";
+      }
+    } else {
+      // Bowler wicket
+      if (!isAllOut) {
+        strikerId = newBatsmanId as string;
+      } else {
+        strikerId = "";
+        nonStrikerId = "";
+      }
       bowler.stats.bowling.wickets += 1;
     }
   }
-
   // --- Bowler stats ---
   const bowlerRuns = bowlerRunsConceded(parsed);
   bowler.stats.bowling.runs += bowlerRuns;
@@ -219,8 +280,8 @@ export function addBall(
   if (parsed.isLegal) {
     bowler.stats.bowling.balls += 1;
 
-    if (bowler.stats.bowling.balls === 6) {
-      // Over completed – capture data BEFORE clearing thisOver
+    if (bowler.stats.bowling.balls >= 6) {
+      // Over completed – capture thisOver BEFORE clearing
       const completedOverBalls = [...innings.thisOver];
       const overRuns = completedOverBalls.reduce(
         (sum, b) => sum + bowlerRunsConceded(parseBallResult(b)),
@@ -233,52 +294,72 @@ export function addBall(
 
       innings.thisOver = [];
       innings.overs += 1;
-      innings.balls = 0;
+      innings.ballsInOver = 0;
 
       overCompleteFlag = true;
       overRunsValue = overRuns;
     }
   }
 
-  // --- Strike rotation ---
-  const rotationRuns =
-    parsed.extraType === "bye" || parsed.extraType === "legBye"
-      ? parsed.extraRuns
-      : parsed.runsTotal;
-
-  if (rotationRuns % 2 === 1) {
-    [innings.strikerId, innings.nonStrikerId] = [
-      innings.nonStrikerId,
-      innings.strikerId,
-    ];
+  // --- Strike rotation (correct cricket logic) ---
+  // Determine how many runs were physically run
+  let runsRun: number;
+  if (parsed.extraType === "wide") {
+    const penalty = Number(matchRules.wide.runs ?? 0) || 0;
+    runsRun = parsed.runsTotal - penalty;
+  } else if (parsed.extraType === "noBall") {
+    runsRun = parsed.batterRuns;
+  } else if (parsed.extraType === "bye" || parsed.extraType === "legBye") {
+    runsRun = parsed.runsTotal;
+  } else {
+    runsRun = parsed.runsTotal;
   }
 
-  // --- Recalculate rates ---
-  striker.stats.batting.strikeRate =
-    striker.stats.batting.balls > 0
-      ? (striker.stats.batting.runs / striker.stats.batting.balls) * 100
-      : 0;
+  const shouldRotate = runsRun % 2 === 1;
+
+  // Apply rotation for this ball (only if no wicket, because wicket already rearranged)
+  if (!wicketJustFell && shouldRotate) {
+    [strikerId, nonStrikerId] = swapIds(strikerId, nonStrikerId);
+  }
+
+  // Over-end swap (always, after ball rotation)
+  if (overCompleteFlag && !inningsEnded) {
+    [strikerId, nonStrikerId] = swapIds(strikerId, nonStrikerId);
+  }
+
+  // --- Update innings with final IDs ---
+  innings.strikerId = strikerId || null;
+  innings.nonStrikerId = nonStrikerId || null;
+
+  // --- Recalculate strike rate for BOTH batsmen ---
+  const calcSR = (runs: number, balls: number) =>
+    balls > 0 ? Number(((runs / balls) * 100).toFixed(2)) : 0;
+
+  striker.stats.batting.strikeRate = calcSR(
+    striker.stats.batting.runs,
+    striker.stats.batting.balls,
+  );
+  nonStriker.stats.batting.strikeRate = calcSR(
+    nonStriker.stats.batting.runs,
+    nonStriker.stats.batting.balls,
+  );
 
   const oversBowled =
     bowler.stats.bowling.overs + bowler.stats.bowling.balls / 6;
   bowler.stats.bowling.economy = oversBowled
-    ? bowler.stats.bowling.runs / oversBowled
+    ? Number((bowler.stats.bowling.runs / oversBowled).toFixed(2))
     : 0;
 
-  // --- Commit player changes ---
+  // --- Commit player objects back to players map ---
   players[striker.id] = striker;
   players[nonStriker.id] = nonStriker;
   players[bowler.id] = bowler;
 
-  if (parsed.isWicket && newBatsmanId && !players[newBatsmanId]) {
-    console.warn(`Player ${newBatsmanId} not found in store`);
-  }
-
   // --- Build ball detail for scorecard ---
   const ballDetail: BallDetail = {
     ballIndex: 0, // set by scorecard store
-    overNumber: innings.overs - (overCompleteFlag ? 1 : 0),
-    ballInOver: overCompleteFlag ? 5 : innings.balls - 1,
+    overNumber: currentOverNumber,
+    ballInOver: currentBallInOver,
     result: ballResult,
     runs: parsed.runsTotal,
     batterRuns: parsed.batterRuns,
@@ -289,17 +370,17 @@ export function addBall(
     wicketType: wicketType,
     batsmanOutId: parsed.isWicket ? striker.id : undefined,
     newBatsmanId: parsed.isWicket ? newBatsmanId : undefined,
-    strikerId: striker.id,
-    nonStrikerId: nonStriker.id,
+    newBatsmanName: parsed.isWicket ? newBatsmanName : undefined,
+    facingStrikerId: striker.id, // the batter who faced the ball (original striker)
+    facingNonStrikerId: nonStriker.id, // the original non-striker
     bowlerId: bowler.id,
     bowlerRuns: bowlerRuns,
     isBowlerWicket: parsed.isWicket && wicketType !== "run out",
     overComplete: overCompleteFlag,
     overRuns: overCompleteFlag ? overRunsValue : undefined,
-    strikerName: striker.name,
-    nonStrikerName: nonStriker.name,
+    facingStrikerName: striker.name,
+    facingNonStrikerName: nonStriker.name,
     bowlerName: bowler.name,
-    newBatsmanName: parsed.isWicket ? newBatsmanName : undefined,
   };
 
   return {

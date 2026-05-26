@@ -43,6 +43,7 @@ export const useStartMatch = () => {
       nonStrikerName,
       bowlerName: openingBowlerName,
       matchRules,
+      maxOvers: parseInt(overs, 10),
     });
 
     const battingTeamName = battingTeam === "teamA" ? teamAName : teamBName;

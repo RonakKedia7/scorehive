@@ -25,12 +25,20 @@ const initialState = {
   innings2: createEmptyInnings(),
 
   overCompleted: false,
+  maxOvers: 0,
 };
 
 export const useScoringStore = create<ScoringStore>((set, get) => ({
   ...initialState,
 
-  initializeMatch: (params) => set((state) => initMatch({ ...params, state })),
+  initializeMatch: (params) =>
+    set((state) => {
+      const matchState = initMatch({ ...params, state });
+      return {
+        ...matchState,
+        maxOvers: params.maxOvers, // store the limit
+      };
+    }),
 
   addBall: (ballResult, options) =>
     set((state) => {
@@ -75,6 +83,19 @@ export const useScoringStore = create<ScoringStore>((set, get) => ({
     }),
 
   clearOverCompleted: () => set({ overCompleted: false }),
+
+  setBowler: (playerId: string) =>
+    set((state) => {
+      const inningsKey = state.currentInnings === 1 ? "innings1" : "innings2";
+      return {
+        [inningsKey]: {
+          ...state[inningsKey],
+          currentBowlerId: playerId,
+          thisOver: [],
+        },
+        overCompleted: false,
+      };
+    }),
 
   resetScoringStore: () => set({ ...initialState }),
 }));

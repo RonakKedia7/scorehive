@@ -9,7 +9,7 @@ export const createEmptyInnings = (): Innings => ({
   wickets: 0,
 
   overs: 0,
-  balls: 0,
+  ballsInOver: 0,
 
   strikerId: null,
   nonStrikerId: null,

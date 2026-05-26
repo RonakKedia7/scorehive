@@ -99,26 +99,23 @@ export const useScorecardStore = create<ScorecardState>((set, get) => ({
       const inningsIndex = state.match.innings.length - 1;
       const innings = { ...state.match.innings[inningsIndex] };
 
-      // Assign ball index
       const ballWithIndex = { ...ballDetail, ballIndex: innings.balls.length };
       const updatedBalls = [...innings.balls, ballWithIndex];
 
-      // Helpers
       const formatOvers = (overs: number) =>
         `${Math.floor(overs)}.${Math.round((overs - Math.floor(overs)) * 10)}`;
 
-      // --- Partnership tracking ---
       let partnership = innings.currentPartnership + ballDetail.runs;
 
       // --- Batsmen ---
       let batsmen = [...innings.batsmen];
       let strikerEntry = batsmen.find(
-        (b) => b.playerId === ballDetail.strikerId,
+        (b) => b.playerId === ballDetail.facingStrikerId,
       );
       if (!strikerEntry) {
         strikerEntry = {
-          playerId: ballDetail.strikerId,
-          name: ballDetail.strikerName,
+          playerId: ballDetail.facingStrikerId,
+          name: ballDetail.facingStrikerName,
           runs: 0,
           balls: 0,
           fours: 0,
@@ -134,22 +131,21 @@ export const useScorecardStore = create<ScorecardState>((set, get) => ({
       strikerEntry.runs += ballDetail.batterRuns;
       if (ballDetail.batterRuns === 4) strikerEntry.fours += 1;
       if (ballDetail.batterRuns === 6) strikerEntry.sixes += 1;
+
+      // ✅ Strike rate rounded to 2 decimals
       strikerEntry.strikeRate =
         strikerEntry.balls > 0
-          ? (strikerEntry.runs / strikerEntry.balls) * 100
+          ? Number(((strikerEntry.runs / strikerEntry.balls) * 100).toFixed(2))
           : 0;
 
       // --- Fall of wicket & dismissal ---
       let fallOfWickets = [...innings.fallOfWickets];
       if (ballDetail.isWicket) {
-        // Build dismissal description
-        const dismissal = ballDetail.wicketType ?? "out";
-        strikerEntry.dismissal = dismissal;
+        strikerEntry.dismissal = ballDetail.wicketType ?? "out";
 
-        // Record fall of wicket
         const newTotalRuns = innings.totalRuns + ballDetail.runs;
         const newWickets = innings.wickets + 1;
-        const oversAt = formatOvers(innings.totalOvers); // overs at this moment
+        const oversAt = formatOvers(innings.totalOvers);
         fallOfWickets.push({
           wicketNumber: newWickets,
           runsAt: newTotalRuns,
@@ -158,10 +154,8 @@ export const useScorecardStore = create<ScorecardState>((set, get) => ({
           batsmanOutId: strikerEntry.playerId,
         });
 
-        // Reset partnership after wicket
         partnership = 0;
 
-        // New batsman
         if (ballDetail.newBatsmanId) {
           if (!batsmen.find((b) => b.playerId === ballDetail.newBatsmanId)) {
             batsmen.push({
@@ -200,15 +194,20 @@ export const useScorecardStore = create<ScorecardState>((set, get) => ({
         const totalBalls = bowlerEntry.legalBalls;
         const completedOvers = Math.floor(totalBalls / 6);
         const remainingBalls = totalBalls % 6;
+        // Keep overs in display format (e.g., 1.1)
         bowlerEntry.overs = completedOvers + remainingBalls * 0.1;
       }
+
       if (ballDetail.isBowlerWicket) {
         bowlerEntry.wickets += 1;
       }
-      bowlerEntry.economy =
-        bowlerEntry.overs > 0 ? bowlerEntry.runs / bowlerEntry.overs : 0;
 
-      // Maiden over
+      const totalOversBowled = bowlerEntry.legalBalls / 6;
+      bowlerEntry.economy =
+        totalOversBowled > 0
+          ? Number((bowlerEntry.runs / totalOversBowled).toFixed(2))
+          : 0;
+
       if (ballDetail.overComplete && ballDetail.overRuns === 0) {
         bowlerEntry.maidens += 1;
       }
@@ -264,7 +263,6 @@ export const useScorecardStore = create<ScorecardState>((set, get) => ({
       const newInnings = [...state.match.innings];
       newInnings[inningsIndex] = updatedInnings;
 
-      console.log("Scorecard after ball:", updatedInnings);
       return { match: { ...state.match, innings: newInnings } };
     });
   },

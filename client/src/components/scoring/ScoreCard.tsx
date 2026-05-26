@@ -7,8 +7,10 @@ const ScoreCard = () => {
 
   const battingTeam = innings.battingTeam === "teamA" ? teamA : teamB;
   const crr =
-    innings.overs + innings.balls / 6 > 0
-      ? (innings.totalRuns / (innings.overs + innings.balls / 6)).toFixed(2)
+    innings.overs + innings.ballsInOver / 6 > 0
+      ? (innings.totalRuns / (innings.overs + innings.ballsInOver / 6)).toFixed(
+          2,
+        )
       : "0.00";
 
   return (
@@ -48,7 +50,7 @@ const ScoreCard = () => {
           </Text>
 
           <Text className="text-text-secondary text-xl font-bold ml-4 mb-2">
-            ({innings.overs}.{innings.balls})
+            ({innings.overs}.{innings.ballsInOver})
           </Text>
         </View>
       </View>

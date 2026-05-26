@@ -1,4 +1,4 @@
-import { View, Text, Pressable, TextInput } from "react-native";
+import { View, Text, Pressable, TextInput, Keyboard } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -45,6 +45,8 @@ const OpeningPlayersScreen = () => {
     }
 
     setError("");
+
+    Keyboard.dismiss();
 
     startMatch({
       strikerName: striker.trim(),

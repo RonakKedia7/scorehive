@@ -99,7 +99,7 @@ export type Innings = {
   wickets: number;
 
   overs: number;
-  balls: number;
+  ballsInOver: number;
 
   strikerId: string | null;
   nonStrikerId: string | null;
@@ -123,6 +123,7 @@ export type ScoringStore = {
   innings2: Innings;
 
   matchRules: MatchRules;
+  maxOvers: number;
 
   overCompleted: boolean;
 
@@ -139,6 +140,7 @@ export type ScoringStore = {
     bowlerName: string;
 
     matchRules: MatchRules;
+    maxOvers: number;
   }) => void;
 
   addBall: (
@@ -147,10 +149,13 @@ export type ScoringStore = {
       newBatsmanId?: string;
       wicketType?: string;
       newBatsmanName?: string;
+      didBattersCross?: boolean;
     },
   ) => void;
 
   startNewOverWithBowler: (bowlerName: string) => void;
+
+  setBowler: (playerId: string) => void;
 
   resetScoringStore: () => void;
 };

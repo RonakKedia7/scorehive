@@ -14,15 +14,15 @@ export type BallDetail = {
   wicketType?: string; // e.g. "c Smith b Johnson" or "run out (Smith)"
   batsmanOutId?: string;
   newBatsmanId?: string;
-  strikerId: string;
-  nonStrikerId: string;
+  facingStrikerId: string;
+  facingNonStrikerId: string;
   bowlerId: string;
   bowlerRuns: number;
   isBowlerWicket: boolean;
   overComplete: boolean;
   overRuns?: number;
-  strikerName: string;
-  nonStrikerName: string;
+  facingStrikerName: string;
+  facingNonStrikerName: string;
   bowlerName: string;
   newBatsmanName?: string;
 };

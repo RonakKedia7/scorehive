@@ -51,6 +51,12 @@ export default function RootLayout() {
             animation: "none",
           }}
         />
+        <Stack.Screen
+          name="new-bowler"
+          options={{
+            animation: "none",
+          }}
+        />
       </Stack>
     </View>
   );
