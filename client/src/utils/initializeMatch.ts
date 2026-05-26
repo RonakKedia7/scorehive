@@ -1,4 +1,4 @@
-import { TeamKey } from "@/types";
+import { MatchRules, TeamKey } from "@/types";
 import { createEmptyInnings, createPlayer } from "@/utils/helperFunctions";
 
 type Params = {
@@ -8,7 +8,7 @@ type Params = {
   strikerName: string;
   nonStrikerName: string;
   bowlerName: string;
-
+  matchRules: MatchRules;
   state: any;
 };
 
@@ -19,6 +19,7 @@ export const initializeMatch = ({
   strikerName,
   nonStrikerName,
   bowlerName,
+  matchRules,
   state,
 }: Params) => {
   const bowlingTeam: TeamKey = battingTeam === "teamA" ? "teamB" : "teamA";
@@ -65,5 +66,7 @@ export const initializeMatch = ({
     },
 
     innings2: createEmptyInnings(),
+
+    matchRules,
   };
 };

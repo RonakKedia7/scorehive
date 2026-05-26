@@ -35,11 +35,12 @@ const PlayerStats = () => {
           Batters
         </Text>
 
-        <View className="flex-row">
-          {["R", "B", "4s", "6s", "SR"].map((item) => (
+        <View className="flex-row shrink-0">
+          {["R", "B", "4s", "6s", "SR"].map((item, index) => (
             <Text
               key={item}
-              className="w-10 text-center text-text-tertiary text-[11px] font-black"
+              className={`text-center text-text-tertiary text-[11px] font-black
+      ${index === 4 ? "w-12" : "w-8"}`}
             >
               {item}
             </Text>
@@ -50,46 +51,62 @@ const PlayerStats = () => {
       {/* BATTERS */}
       {batterRows.map((player) => (
         <View
-          key={player?.name}
-          className="flex-row items-center justify-between px-5 py-4 border-b border-border-light"
+          key={player?.id}
+          className="flex-row items-center px-5 py-4 border-b border-border-light h-[56px]"
         >
-          <View className="flex-1 flex-row items-center">
-            <Text className="w-4 mr-2 text-text-secondary font-black text-base">
+          {/* LEFT PLAYER SECTION */}
+          <View className="flex-1 flex-row items-center pr-2 min-w-0">
+            <Text className="w-4 mr-2 text-text-secondary font-black text-base shrink-0">
               {player?.isStriker ? "*" : ""}
             </Text>
 
             <Text
               numberOfLines={1}
-              className={`flex-1 text-sm font-bold
-                      ${
-                        player?.isStriker
-                          ? "text-text-primary"
-                          : "text-text-secondary"
-                      }`}
+              ellipsizeMode="tail"
+              className={`flex-1 text-sm font-bold min-w-0
+        ${player?.isStriker ? "text-text-primary" : "text-text-secondary"}`}
             >
               {player?.name}
             </Text>
           </View>
 
-          <View className="flex-row">
-            <Text className="w-10 text-center text-text-primary font-black text-sm">
+          {/* RIGHT STATS SECTION */}
+          <View className="flex-row shrink-0">
+            <Text
+              numberOfLines={1}
+              className="w-8 text-center text-text-primary font-black text-sm"
+            >
               {player?.stats?.batting.runs}
             </Text>
 
-            <Text className="w-10 text-center text-text-secondary text-sm">
+            <Text
+              numberOfLines={1}
+              className="w-8 text-center text-text-secondary text-sm"
+            >
               {player?.stats?.batting.balls}
             </Text>
 
-            <Text className="w-10 text-center text-text-secondary text-sm">
+            <Text
+              numberOfLines={1}
+              className="w-8 text-center text-text-secondary text-sm"
+            >
               {player?.stats?.batting.fours}
             </Text>
 
-            <Text className="w-10 text-center text-text-secondary text-sm">
+            <Text
+              numberOfLines={1}
+              className="w-8 text-center text-text-secondary text-sm"
+            >
               {player?.stats?.batting.sixes}
             </Text>
 
-            <Text className="w-10 text-center text-text-secondary font-bold text-sm">
-              {player?.stats?.batting.strikeRate}
+            <Text
+              numberOfLines={1}
+              className="w-12 text-center text-text-secondary font-bold text-sm"
+            >
+              {player?.stats?.batting.strikeRate != null
+                ? player.stats.batting.strikeRate.toFixed(1)
+                : "0.0"}
             </Text>
           </View>
         </View>
@@ -101,11 +118,11 @@ const PlayerStats = () => {
           Bowler
         </Text>
 
-        <View className="flex-row">
-          {["O", "M", "R", "W", "ER"].map((item) => (
+        <View className="flex-row shrink-0">
+          {["O", "M", "R", "W", "ER"].map((item, index) => (
             <Text
               key={item}
-              className="w-10 text-center text-text-tertiary text-[11px] font-black"
+              className={`${index === 4 ? "w-12" : "w-8"} text-center text-text-tertiary text-[11px] font-black`}
             >
               {item}
             </Text>
@@ -114,33 +131,55 @@ const PlayerStats = () => {
       </View>
 
       {/* BOWLER */}
-      <View className="flex-row items-center justify-between px-5 py-4">
-        <Text
-          numberOfLines={1}
-          className="flex-1 text-sm font-bold text-text-primary"
-        >
-          {bowler?.name}
-        </Text>
+      <View className="flex-row items-center px-5 py-4 h-[56px]">
+        {/* LEFT NAME SECTION */}
+        <View className="flex-1 pr-2 min-w-0">
+          <Text
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            className="text-sm font-bold text-text-primary"
+          >
+            {bowler?.name}
+          </Text>
+        </View>
 
-        <View className="flex-row">
-          <Text className="w-10 text-center text-text-primary font-black text-sm">
-            {bowler?.stats?.bowling.overs}.{bowler?.stats?.bowling.balls}
+        {/* RIGHT STATS SECTION */}
+        <View className="flex-row shrink-0">
+          <Text
+            numberOfLines={1}
+            className="w-8 text-center text-text-primary font-black text-sm"
+          >
+            {`${bowler?.stats?.bowling.overs ?? 0}.${bowler?.stats?.bowling.balls ?? 0}`}
           </Text>
 
-          <Text className="w-10 text-center text-text-secondary text-sm">
+          <Text
+            numberOfLines={1}
+            className="w-8 text-center text-text-secondary text-sm"
+          >
             {bowler?.stats?.bowling.maidens}
           </Text>
 
-          <Text className="w-10 text-center text-text-secondary text-sm">
+          <Text
+            numberOfLines={1}
+            className="w-8 text-center text-text-secondary text-sm"
+          >
             {bowler?.stats?.bowling.runs}
           </Text>
 
-          <Text className="w-10 text-center text-text-secondary font-black text-sm">
+          <Text
+            numberOfLines={1}
+            className="w-8 text-center text-text-secondary font-black text-sm"
+          >
             {bowler?.stats?.bowling.wickets}
           </Text>
 
-          <Text className="w-10 text-center text-text-secondary font-bold text-sm">
-            {bowler?.stats?.bowling.economy}
+          <Text
+            numberOfLines={1}
+            className="w-12 text-center text-text-secondary font-bold text-sm"
+          >
+            {bowler?.stats?.bowling.economy != null
+              ? bowler.stats.bowling.economy.toFixed(1)
+              : "0.0"}
           </Text>
         </View>
       </View>

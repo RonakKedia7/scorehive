@@ -122,6 +122,12 @@ export type ScoringStore = {
   innings1: Innings;
   innings2: Innings;
 
+  matchRules: MatchRules;
+
+  overCompleted: boolean;
+
+  clearOverCompleted: () => void;
+
   initializeMatch: (params: {
     teamAName: string;
     teamBName: string;
@@ -131,7 +137,20 @@ export type ScoringStore = {
     strikerName: string;
     nonStrikerName: string;
     bowlerName: string;
+
+    matchRules: MatchRules;
   }) => void;
+
+  addBall: (
+    ballResult: string,
+    options?: {
+      newBatsmanId?: string;
+      wicketType?: string;
+      newBatsmanName?: string;
+    },
+  ) => void;
+
+  startNewOverWithBowler: (bowlerName: string) => void;
 
   resetScoringStore: () => void;
 };

@@ -1,6 +1,7 @@
 import { useRouter } from "expo-router";
 import { useInitialMatchSetup } from "@/stores/useInitialMatchSetup";
 import { useScoringStore } from "@/stores/useScoringStore";
+import { useScorecardStore } from "@/stores/useScorecardStore";
 
 type StartMatchParams = {
   strikerName: string;
@@ -15,6 +16,8 @@ export const useStartMatch = () => {
     teamB: teamBName,
     tossWonBy,
     optedTo,
+    matchRules,
+    overs,
   } = useInitialMatchSetup();
   const { initializeMatch } = useScoringStore();
 
@@ -39,6 +42,19 @@ export const useStartMatch = () => {
       strikerName,
       nonStrikerName,
       bowlerName: openingBowlerName,
+      matchRules,
+    });
+
+    const battingTeamName = battingTeam === "teamA" ? teamAName : teamBName;
+    useScorecardStore.getState().initScorecard({
+      teamA: teamAName,
+      teamB: teamBName,
+      tossWonBy,
+      optedTo,
+      matchRules,
+      maxOvers: parseInt(overs, 10),
+      battingTeamId: battingTeam,
+      battingTeamName,
     });
 
     router.push("/scoring");

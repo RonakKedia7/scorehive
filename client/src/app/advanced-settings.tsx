@@ -86,7 +86,7 @@ const AdvancedSettingsScreen = () => {
           <View className="mb-4 flex-row items-center justify-between">
             <Pressable
               onPress={() => router.back()}
-              className="rounded-xl bg-surface p-3 active:bg-background"
+              className="rounded-xl p-3"
               style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
             >
               <Ionicons

@@ -1,12 +1,43 @@
 import { useInitialMatchSetup } from "@/stores/useInitialMatchSetup";
+import { useScoringStore } from "@/stores/useScoringStore";
 import { View, Text, TouchableOpacity } from "react-native";
+import { useRouter } from "expo-router";
 
 const ControlPad = () => {
+  const router = useRouter();
   const { matchRules } = useInitialMatchSetup();
+  const { innings1, innings2, currentInnings, addBall, overCompleted } =
+    useScoringStore();
+
   const wideAndNoBallArray = [
     matchRules.wide.enabled ? "WD" : null,
     matchRules.noBall.enabled ? "NB" : null,
   ].filter(Boolean);
+
+  const guardOverCompleted = () => {
+    if (overCompleted) {
+      router.push("/new-bowler");
+      return true; // caller can abort
+    }
+    return false;
+  };
+
+  const handleBall = (runs: number) => {
+    if (guardOverCompleted()) return; // <-- prevent scoring
+
+    const currentInningsData = currentInnings === 1 ? innings1 : innings2;
+    const prevBalls = currentInningsData.balls;
+    addBall(`${runs}`);
+
+    const newInnings =
+      currentInnings === 1
+        ? useScoringStore.getState().innings1
+        : useScoringStore.getState().innings2;
+
+    if (prevBalls === 5 && newInnings.balls === 0 && newInnings.overs > 0) {
+      router.push("/new-bowler"); // normal over completion
+    }
+  };
 
   return (
     <View className="flex-1 flex-row mx-4 mt-4 mb-5 gap-3">
@@ -58,6 +89,7 @@ const ControlPad = () => {
             <TouchableOpacity
               key={num}
               activeOpacity={0.85}
+              onPress={() => handleBall(num)}
               className={`
           w-[31%]
           h-[40px]
