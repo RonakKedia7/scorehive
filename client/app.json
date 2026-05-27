@@ -36,7 +36,9 @@
           }
         }
       ],
-      "expo-image"
+      "expo-image",
+      "expo-sharing",
+      "expo-asset"
     ],
     "experiments": {
       "typedRoutes": true,
