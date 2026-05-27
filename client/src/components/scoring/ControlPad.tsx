@@ -76,6 +76,11 @@ const ControlPad = () => {
     useScoringStore.getState().swapBatsmen();
   };
 
+  const handleRetire = () => {
+    if (guardOverCompleted()) return;
+    router.push("/retire-batsman?type=hurt");
+  };
+
   return (
     <View className="flex-1 flex-row mx-4 mt-4 mb-5 gap-3">
       {/* LEFT CONTROLS */}
@@ -206,6 +211,7 @@ const ControlPad = () => {
 
           {/* RETIRE */}
           <Pressable
+            onPress={handleRetire}
             style={({ pressed }) => ({
               opacity: pressed ? 0.8 : 1,
               transform: [{ scale: pressed ? 0.96 : 1 }],

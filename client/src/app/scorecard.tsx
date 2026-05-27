@@ -16,20 +16,9 @@ const ScorecardScreen = () => {
   const scoringState = useScoringStore();
   const [selectedInnings, setSelectedInnings] = useState(0);
 
-  // Derive the two innings scorecards
-  const innings1Scorecard = useMemo(
-    () => selectInningsScorecard(scoringState, 1),
-    [scoringState],
-  );
-  const innings2Scorecard = useMemo(
-    () => selectInningsScorecard(scoringState, 2),
-    [scoringState],
-  );
-
-  const matchResult = useMemo(
-    () => selectMatchResult(scoringState),
-    [scoringState],
-  );
+  const innings1Scorecard = selectInningsScorecard(scoringState, 1);
+  const innings2Scorecard = selectInningsScorecard(scoringState, 2);
+  const matchResult = selectMatchResult(scoringState);
 
   const inningsList = [innings1Scorecard, innings2Scorecard].filter(
     (inn): inn is NonNullable<typeof inn> => inn !== null,

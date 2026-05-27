@@ -35,6 +35,9 @@ const BallTimeline = ({ innings }: { innings: InningsScorecard }) => {
         renderItem={({ item }) => {
           const [overNumber, balls] = item;
           const displayOver = Number(overNumber) + 1;
+          const legalBallsForCount = balls.filter(
+            (b) => b.result !== "RH" && b.result !== "RO",
+          );
 
           return (
             <View className="mb-4">
@@ -45,43 +48,43 @@ const BallTimeline = ({ innings }: { innings: InningsScorecard }) => {
                 </Text>
 
                 <Text className="text-text-tertiary text-xs">
-                  {balls.length} balls
+                  {legalBallsForCount.length} balls
                 </Text>
               </View>
 
               {/* BALLS */}
               <View className="flex-row flex-wrap gap-2">
                 {balls.map((ball: any, index: number) => {
-                  // Fix: Determine if it's a wicket, boundary, or extra
-                  const isWicket = ball.isWicket === true;
+                  const isRetirement =
+                    ball.result === "RH" || ball.result === "RO";
+                  const isWicket = ball.isWicket === true && !isRetirement;
                   const isBoundary = ball.runs === 4 || ball.runs === 6;
                   const isExtra =
                     ball.extraType !== null && ball.extraType !== undefined;
-
-                  // For display, show the result string (e.g., "Wd", "Nb", "4", "6", "1", etc.)
-                  const displayText = ball.result || ball.runs.toString();
+                  const displayText = isRetirement
+                    ? ball.result === "RH"
+                      ? "RH"
+                      : "RO"
+                    : ball.result || ball.runs.toString();
 
                   return (
                     <View
                       key={index}
                       className={`w-11 h-11 rounded-full items-center justify-center border
-                ${
-                  isWicket
-                    ? "bg-danger border-danger-dark"
-                    : isBoundary
-                      ? "bg-secondary border-secondary-700"
-                      : isExtra
-                        ? "bg-warning border-warning-dark"
-                        : "bg-surfaceSecondary border-border-light"
-                }`}
+        ${
+          isRetirement
+            ? "bg-surfaceSecondary border-border-light"
+            : isWicket
+              ? "bg-danger border-danger-dark"
+              : isBoundary
+                ? "bg-secondary border-secondary-700"
+                : isExtra
+                  ? "bg-warning border-warning-dark"
+                  : "bg-surfaceSecondary border-border-light"
+        }`}
                     >
                       <Text
-                        className={`font-black text-base
-            ${
-              isWicket || isBoundary || isExtra
-                ? "text-text-inverse"
-                : "text-text-primary"
-            }`}
+                        className={`font-black text-base ${isRetirement ? "text-text-secondary" : isWicket || isBoundary || isExtra ? "text-text-inverse" : "text-text-primary"}`}
                       >
                         {displayText}
                       </Text>

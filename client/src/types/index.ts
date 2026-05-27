@@ -180,5 +180,13 @@ export type ScoringStore = {
 
   swapBatsmen: () => void;
 
+  retireBatsman: (
+    type: "hurt" | "out",
+    newBatsmanId?: string,
+    newBatsmanName?: string,
+  ) => void;
+
+  startNewInnings: () => void;
+
   resetScoringStore: () => void;
 };

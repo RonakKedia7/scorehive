@@ -77,8 +77,6 @@ const ScoreCard = () => {
                 !isExtra && (item.batterRuns === 4 || item.batterRuns === 6);
               const displayText = formatBallResult(item);
 
-              console.log(item);
-
               return (
                 <View
                   className={`w-[46px] h-[46px] rounded-full items-center justify-center border

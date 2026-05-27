@@ -27,6 +27,22 @@ const BattingCard = ({ innings }: { innings: InningsScorecard }) => {
       {/* BATTERS */}
       {innings.batsmen.map((player: BattingScorecardEntry, index: number) => {
         const isOut = !!player.dismissal;
+        const isDidNotBat = !isOut && player.runs === 0 && player.balls === 0;
+
+        // Determine dismissal display text
+        let dismissalText = player.dismissal || "not out";
+        if (isDidNotBat) dismissalText = "did not bat";
+
+        // Determine text color
+        let nameTextColor = "text-text-primary";
+        let statsTextColor = "text-text-primary";
+        if (isOut) nameTextColor = "text-text-tertiary line-through";
+        else if (isDidNotBat) nameTextColor = "text-text-tertiary";
+        else nameTextColor = "text-text-primary";
+
+        if (isOut) statsTextColor = "text-text-tertiary";
+        else if (isDidNotBat) statsTextColor = "text-text-tertiary";
+        else statsTextColor = "text-text-primary";
 
         return (
           <View
@@ -35,17 +51,13 @@ const BattingCard = ({ innings }: { innings: InningsScorecard }) => {
               index !== innings.batsmen.length - 1
                 ? "border-b border-border-light"
                 : ""
-            } ${isOut ? "bg-surfaceSecondary/40" : "bg-surface"}`}
+            } ${isOut ? "bg-surfaceSecondary/40" : isDidNotBat ? "bg-surface/40" : "bg-surface"}`}
           >
             {/* PLAYER INFO */}
             <View className="flex-1 pr-3">
               <Text
                 numberOfLines={1}
-                className={`text-[15px] font-bold ${
-                  isOut
-                    ? "text-text-tertiary line-through"
-                    : "text-text-primary"
-                }`}
+                className={`text-[15px] font-bold ${nameTextColor}`}
               >
                 {player.name}
               </Text>
@@ -53,32 +65,38 @@ const BattingCard = ({ innings }: { innings: InningsScorecard }) => {
               <Text
                 numberOfLines={1}
                 className={`text-xs mt-1 ${
-                  isOut ? "text-text-tertiary" : "text-text-secondary"
+                  isOut || isDidNotBat
+                    ? "text-text-tertiary"
+                    : "text-text-secondary"
                 }`}
               >
-                {player.dismissal || "not out"}
+                {dismissalText}
               </Text>
             </View>
 
             {/* STATS */}
             <View className="flex-row shrink-0 items-center">
-              <Text className="w-8 text-center text-text-primary font-black text-sm">
+              <Text
+                className={`w-8 text-center font-black text-sm ${statsTextColor}`}
+              >
                 {player.runs}
               </Text>
 
-              <Text className="w-8 text-center text-text-secondary text-sm">
+              <Text className={`w-8 text-center text-sm ${statsTextColor}`}>
                 {player.balls}
               </Text>
 
-              <Text className="w-8 text-center text-text-secondary text-sm">
+              <Text className={`w-8 text-center text-sm ${statsTextColor}`}>
                 {player.fours}
               </Text>
 
-              <Text className="w-8 text-center text-text-secondary text-sm">
+              <Text className={`w-8 text-center text-sm ${statsTextColor}`}>
                 {player.sixes}
               </Text>
 
-              <Text className="w-12 text-center text-text-secondary font-bold text-sm">
+              <Text
+                className={`w-12 text-center font-bold text-sm ${statsTextColor}`}
+              >
                 {player.strikeRate.toFixed(1)}
               </Text>
             </View>
