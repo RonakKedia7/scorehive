@@ -1,9 +1,10 @@
 import { create } from "zustand";
-import { MatchRules, Player, ScoringStore } from "@/types";
+import { MatchRules, ScoringStore } from "@/types";
 import { initializeMatch as initMatch } from "@/utils/initializeMatch";
 import { addBall as addBallLogic } from "@/utils/addBall";
 import { createEmptyInnings, createPlayer } from "@/utils/helperFunctions";
-import { useScorecardStore } from "./useScorecardStore";
+import { cloneScoringStore } from "@/utils/cloneStore";
+import { BallDetail } from "@/types/scorecard";
 
 const defaultMatchRules: MatchRules = {
   playersPerTeam: "11",
@@ -13,131 +14,194 @@ const defaultMatchRules: MatchRules = {
 
 const initialState = {
   players: {},
-
   matchRules: defaultMatchRules,
-
   teamA: { name: "", playersIds: [] },
   teamB: { name: "", playersIds: [] },
-
   currentInnings: 1 as 1 | 2,
-
   innings1: createEmptyInnings(),
   innings2: createEmptyInnings(),
-
   overCompleted: false,
   maxOvers: 0,
+  lastBall: null as BallDetail | null,
 };
 
-// Simple ID generator (or import from utils)
-const generateId = () =>
-  Date.now().toString() + Math.random().toString(36).substring(2, 8);
+export const useScoringStore = create<ScoringStore>((set, get) => {
+  const pushToUndo = () => {
+    const current = get();
+    const snapshot = cloneScoringStore(current);
+    set((state) => ({
+      undoStack: [snapshot, ...state.undoStack].slice(0, 20),
+      // redoStack removed entirely
+    }));
+  };
 
-export const useScoringStore = create<ScoringStore>((set, get) => ({
-  ...initialState,
+  return {
+    ...initialState,
 
-  initializeMatch: (params) =>
-    set((state) => {
-      const matchState = initMatch({ ...params, state });
-      return {
-        ...matchState,
-        maxOvers: params.maxOvers,
-      };
-    }),
+    undoStack: [],
 
-  addBall: (ballResult, options) =>
-    set((state) => {
-      const {
-        state: newState,
-        ballDetail,
-        overComplete,
-      } = addBallLogic(state, ballResult, options);
+    lastBall: null,
 
-      useScorecardStore.getState().recordBall(ballDetail);
+    initializeMatch: (params) => {
+      pushToUndo();
+      set((state) => {
+        const matchState = initMatch({ ...params, state });
+        return {
+          ...matchState,
+          maxOvers: params.maxOvers,
+          lastBall: null,
+        };
+      });
+    },
 
-      return {
-        ...newState,
-        overCompleted: overComplete,
-      };
-    }),
+    addBall: (ballResult, options) => {
+      pushToUndo();
+      set((state) => {
+        // 1. Capture current ballLog BEFORE any changes
+        const inningsKey = state.currentInnings === 1 ? "innings1" : "innings2";
+        const currentBallLog = state[inningsKey]?.ballLog || [];
 
-  startNewOverWithBowler: (bowlerName: string) =>
-    set((state) => {
-      const newBowler = createPlayer(bowlerName);
-      const players = { ...state.players, [newBowler.id]: newBowler };
+        // 2. Call the pure scoring engine
+        const {
+          state: newState,
+          ballDetail,
+          overComplete,
+        } = addBallLogic(state, ballResult, options as any);
 
-      const inningsKey = state.currentInnings === 1 ? "innings1" : "innings2";
-      const innings = state[inningsKey];
-      const bowlingTeamKey = innings.bowlingTeam!;
+        // 3. Get the updated innings from newState (this has updated runs, wickets, etc., but no ballLog)
+        const updatedInnings = newState[inningsKey];
+        if (!updatedInnings) {
+          return {
+            ...newState,
+            overCompleted: overComplete,
+            lastBall: ballDetail,
+          };
+        }
 
-      const team = { ...state[bowlingTeamKey] };
-      if (!team.playersIds.includes(newBowler.id)) {
-        team.playersIds = [...team.playersIds, newBowler.id];
-      }
+        // 4. Create the final innings with the merged ballLog
+        const finalInnings = {
+          ...updatedInnings,
+          ballLog: [...currentBallLog, ballDetail],
+        };
 
-      return {
-        players,
-        [bowlingTeamKey]: team,
-        [inningsKey]: {
-          ...innings,
-          currentBowlerId: newBowler.id,
-        },
-      };
-    }),
+        // 5. Return merged state
+        return {
+          ...newState,
+          [inningsKey]: finalInnings,
+          overCompleted: overComplete,
+          lastBall: ballDetail,
+        };
+      });
+    },
 
-  clearOverCompleted: () => set({ overCompleted: false }),
+    startNewOverWithBowler: (bowlerName: string) => {
+      pushToUndo();
+      set((state) => {
+        const newBowler = createPlayer(bowlerName);
+        const players = { ...state.players, [newBowler.id]: newBowler };
+        const inningsKey = state.currentInnings === 1 ? "innings1" : "innings2";
+        const innings = state[inningsKey];
+        const bowlingTeamKey = innings.bowlingTeam!;
+        const team = { ...state[bowlingTeamKey] };
+        if (!team.playersIds.includes(newBowler.id)) {
+          team.playersIds = [...team.playersIds, newBowler.id];
+        }
+        return {
+          players,
+          [bowlingTeamKey]: team,
+          [inningsKey]: {
+            ...innings,
+            currentBowlerId: newBowler.id,
+          },
+        };
+      });
+    },
 
-  setBowler: (playerId: string) =>
-    set((state) => {
-      const inningsKey = state.currentInnings === 1 ? "innings1" : "innings2";
-      return {
-        [inningsKey]: {
-          ...state[inningsKey],
-          currentBowlerId: playerId,
-          thisOver: [],
-        },
-        overCompleted: false,
-      };
-    }),
+    clearOverCompleted: () => {
+      pushToUndo();
+      set({ overCompleted: false });
+    },
 
-  addPlayerToBattingTeam: (name: string) => {
-    const newPlayer = createPlayer(name);
-    set((state) => {
-      const players = { ...state.players, [newPlayer.id]: newPlayer };
-      const inningsKey = state.currentInnings === 1 ? "innings1" : "innings2";
-      const innings = state[inningsKey];
-      const battingTeamKey = innings.battingTeam!;
-      const team = { ...state[battingTeamKey] };
+    setBowler: (playerId: string) => {
+      pushToUndo();
+      set((state) => {
+        const inningsKey = state.currentInnings === 1 ? "innings1" : "innings2";
+        return {
+          [inningsKey]: {
+            ...state[inningsKey],
+            currentBowlerId: playerId,
+            thisOver: [],
+          },
+          overCompleted: false,
+        };
+      });
+    },
 
-      if (!team.playersIds.includes(newPlayer.id)) {
-        team.playersIds = [...team.playersIds, newPlayer.id];
-      }
+    addPlayerToBattingTeam: (name: string) => {
+      pushToUndo();
+      const newPlayer = createPlayer(name);
+      set((state) => {
+        const players = { ...state.players, [newPlayer.id]: newPlayer };
+        const inningsKey = state.currentInnings === 1 ? "innings1" : "innings2";
+        const innings = state[inningsKey];
+        const battingTeamKey = innings.battingTeam!;
+        const team = { ...state[battingTeamKey] };
+        if (!team.playersIds.includes(newPlayer.id)) {
+          team.playersIds = [...team.playersIds, newPlayer.id];
+        }
+        return { players, [battingTeamKey]: team };
+      });
+      return newPlayer.id;
+    },
 
-      return {
-        players,
-        [battingTeamKey]: team,
-      };
-    });
-    return newPlayer.id;
-  },
+    addPlayerToTeam: (teamKey: "teamA" | "teamB", name: string) => {
+      pushToUndo();
+      const newPlayer = createPlayer(name);
+      set((state) => {
+        const players = { ...state.players, [newPlayer.id]: newPlayer };
+        const team = { ...state[teamKey] };
+        if (!team.playersIds.includes(newPlayer.id)) {
+          team.playersIds = [...team.playersIds, newPlayer.id];
+        }
+        return { players, [teamKey]: team };
+      });
+      return newPlayer.id;
+    },
 
-  addPlayerToTeam: (teamKey: "teamA" | "teamB", name: string) => {
-    // Reuse createPlayer to ensure consistent stats
-    const newPlayer = createPlayer(name);
-    set((state) => {
-      const players = { ...state.players, [newPlayer.id]: newPlayer };
-      const team = { ...state[teamKey] };
+    resetScoringStore: () => {
+      pushToUndo();
+      set({ ...initialState, undoStack: [], lastBall: null });
+    },
 
-      if (!team.playersIds.includes(newPlayer.id)) {
-        team.playersIds = [...team.playersIds, newPlayer.id];
-      }
+    undo: () => {
+      const { undoStack, lastBall } = get();
+      if (undoStack.length === 0) return;
+      const [previousState, ...remainingUndo] = undoStack;
 
-      return {
-        players,
-        [teamKey]: team,
-      };
-    });
-    return newPlayer.id;
-  },
+      set({
+        ...previousState,
+        undoStack: remainingUndo,
+        lastBall: previousState.lastBall,
+      });
+    },
 
-  resetScoringStore: () => set({ ...initialState }),
-}));
+    swapBatsmen: () => {
+      pushToUndo();
+      set((state) => {
+        const inningsKey = state.currentInnings === 1 ? "innings1" : "innings2";
+        const innings = state[inningsKey];
+        if (!innings.strikerId || !innings.nonStrikerId) return state;
+        return {
+          [inningsKey]: {
+            ...innings,
+            strikerId: innings.nonStrikerId,
+            nonStrikerId: innings.strikerId,
+          },
+          lastBall: null,
+        };
+      });
+    },
+
+    clearHistory: () => set({ undoStack: [] }),
+  };
+});

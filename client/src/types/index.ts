@@ -1,4 +1,5 @@
-import { ParsedBall } from "@/utils/ballHelpers";
+import { ParsedBall, WicketType } from "@/utils/ballHelpers";
+import { BallDetail, FallOfWicket } from "./scorecard";
 
 export type OptedTo = "bat" | "bowl";
 
@@ -113,6 +114,10 @@ export type Innings = {
   extras: Extras;
 
   thisOver: ParsedBall[];
+
+  ballLog: BallDetail[];
+
+  fallOfWickets: FallOfWicket[];
 };
 
 export type ScoringStore = {
@@ -130,6 +135,9 @@ export type ScoringStore = {
   maxOvers: number;
 
   overCompleted: boolean;
+
+  lastBall: BallDetail | null;
+  undoStack: ScoringStore[];
 
   clearOverCompleted: () => void;
 
@@ -151,7 +159,7 @@ export type ScoringStore = {
     ballResult: string,
     options?: {
       newBatsmanId?: string;
-      wicketType?: string;
+      wicketType?: WicketType;
       newBatsmanName?: string;
       didBattersCross?: boolean;
       outType?: "striker" | "nonStriker";
@@ -165,6 +173,12 @@ export type ScoringStore = {
   addPlayerToBattingTeam: (name: string) => string;
 
   addPlayerToTeam: (teamKey: TeamKey, name: string) => string;
+
+  undo: () => void;
+
+  clearHistory: () => void;
+
+  swapBatsmen: () => void;
 
   resetScoringStore: () => void;
 };

@@ -23,6 +23,8 @@ export const createEmptyInnings = (): Innings => ({
   },
 
   thisOver: [],
+  ballLog: [],
+  fallOfWickets: [],
 });
 
 export const createPlayer = (name: string): Player => {

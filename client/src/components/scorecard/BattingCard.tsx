@@ -2,7 +2,6 @@ import { BattingScorecardEntry, InningsScorecard } from "@/types/scorecard";
 import { View, Text } from "react-native";
 
 const BattingCard = ({ innings }: { innings: InningsScorecard }) => {
-  console.log(innings);
   return (
     <View className="mx-4 mt-4 bg-surface rounded-card border border-border-light overflow-hidden">
       {/* HEADER */}

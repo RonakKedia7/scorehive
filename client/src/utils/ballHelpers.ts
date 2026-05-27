@@ -62,39 +62,45 @@ export function parseBallResult(ball: string): ParsedBall {
 
   const extraMatch = ball.match(/^(\d+)(wd|nb|b|lb)$/);
   if (extraMatch) {
-    const num = Number(extraMatch[1]);
+    const runsOffBat = Number(extraMatch[1]); // e.g., 2 from "2wd"
     const type = extraMatch[2];
 
     switch (type) {
       case "wd":
         return {
-          ...result,
-          runsTotal: num,
-          extraRuns: num,
+          runsTotal: 0, // will be set in applyMatchRules
+          batterRuns: runsOffBat,
+          extraRuns: 0, // will be set in applyMatchRules
           extraType: "wide",
+          isWicket: false,
           isLegal: false,
         };
       case "nb":
         return {
-          ...result,
-          runsTotal: num,
+          runsTotal: 0,
+          batterRuns: runsOffBat,
+          extraRuns: 0,
           extraType: "noBall",
+          isWicket: false,
           isLegal: false,
         };
+      // for "b" and "lb": no penalty, so runsTotal = runsOffBat, extraRuns = runsOffBat, batterRuns = 0
       case "b":
         return {
-          ...result,
-          runsTotal: num,
-          extraRuns: num,
+          runsTotal: runsOffBat,
+          batterRuns: 0,
+          extraRuns: runsOffBat,
           extraType: "bye",
+          isWicket: false,
           isLegal: true,
         };
       case "lb":
         return {
-          ...result,
-          runsTotal: num,
-          extraRuns: num,
+          runsTotal: runsOffBat,
+          batterRuns: 0,
+          extraRuns: runsOffBat,
           extraType: "legBye",
+          isWicket: false,
           isLegal: true,
         };
     }
@@ -114,7 +120,6 @@ export function bowlerRunsConceded(p: ParsedBall): number {
     case "legBye":
       return 0;
     case "wide":
-      return p.extraRuns;
     case "noBall":
       return p.extraRuns + p.batterRuns;
     default:
@@ -131,17 +136,14 @@ export function applyMatchRules(
 ): void {
   if (parsed.extraType === "noBall" && matchRules.noBall.enabled) {
     const penalty = parseInt(matchRules.noBall.runs, 10) || 1;
-    const batterRuns = parsed.runsTotal;
-    parsed.runsTotal = batterRuns + penalty;
-    parsed.batterRuns = batterRuns;
     parsed.extraRuns = penalty;
+    parsed.runsTotal = parsed.batterRuns + penalty;
     parsed.isLegal = !matchRules.noBall.reBall;
   }
   if (parsed.extraType === "wide" && matchRules.wide.enabled) {
     const penalty = Number(matchRules.wide.runs ?? 1) || 1;
-    const enteredRuns = parsed.runsTotal;
-    parsed.runsTotal = enteredRuns + penalty;
-    parsed.extraRuns = parsed.runsTotal;
+    parsed.extraRuns = penalty;
+    parsed.runsTotal = parsed.batterRuns + penalty;
     parsed.isLegal = !matchRules.wide.reBall;
   }
 }
@@ -422,7 +424,6 @@ export function resolveStrikeRotation(params: StrikeRotationParams): {
 // utils/ballHelpers.ts
 export function formatBallResult(ball: ParsedBall): string {
   if (ball.isWicket) {
-    // e.g., "W" or "1W" (if runs were scored before wicket)
     return ball.batterRuns > 0 ? `${ball.batterRuns}W` : "W";
   }
   if (ball.extraType) {
@@ -441,9 +442,13 @@ export function formatBallResult(ball: ParsedBall): string {
         suffix = "lb";
         break;
     }
-    return `${ball.runsTotal}${suffix}`;
+
+    const runsToShow =
+      ball.extraType === "wide" || ball.extraType === "noBall"
+        ? ball.batterRuns
+        : ball.runsTotal;
+    return `${runsToShow}${suffix}`;
   }
-  // Normal run
   return `${ball.runsTotal}`;
 }
 // ---------- Build BallDetail ----------

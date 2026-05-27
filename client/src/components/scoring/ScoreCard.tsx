@@ -1,10 +1,15 @@
 import { View, Text } from "react-native";
 import { FlashList } from "@shopify/flash-list";
-import { useInnings } from "@/hooks/useInnings";
+import { useScoringStore } from "@/stores/useScoringStore";
 import { formatBallResult, ParsedBall } from "@/utils/ballHelpers";
 
 const ScoreCard = () => {
-  const { innings, currentInnings, teamA, teamB } = useInnings();
+  const scoringState = useScoringStore();
+  const currentInnings = scoringState.currentInnings;
+  const innings =
+    currentInnings === 1 ? scoringState.innings1 : scoringState.innings2;
+  const teamA = scoringState.teamA;
+  const teamB = scoringState.teamB;
 
   const battingTeam = innings.battingTeam === "teamA" ? teamA : teamB;
   const crr =
@@ -23,17 +28,14 @@ const ScoreCard = () => {
             <Text className="text-text-tertiary text-[11px] font-bold tracking-[2px]">
               INNINGS {currentInnings}
             </Text>
-
             <Text className="text-text-primary text-3xl font-black mt-1">
               {battingTeam.name}
             </Text>
           </View>
-
-          <View className="bg-surface px-4 py-3 rounded-card items-center ">
+          <View className="bg-surface px-4 py-3 rounded-card items-center">
             <Text className="text-text-tertiary text-[10px] font-bold">
               CURRENT RR
             </Text>
-
             <Text className="text-text-primary text-xl font-black mt-0.5">
               {crr}
             </Text>
@@ -45,11 +47,9 @@ const ScoreCard = () => {
           <Text className="text-[58px] leading-[62px] font-black text-text-primary">
             {innings.totalRuns}
           </Text>
-
           <Text className="text-[38px] leading-[44px] font-black text-danger ml-1">
             /{innings.wickets}
           </Text>
-
           <Text className="text-text-secondary text-xl font-bold ml-4 mb-2">
             ({innings.overs}.{innings.ballsInOver})
           </Text>
@@ -63,42 +63,42 @@ const ScoreCard = () => {
             THIS OVER
           </Text>
         </View>
-
         <View className="h-[46px]">
           <FlashList
-            data={innings.thisOver as ParsedBall[]} // ensure type
+            data={innings.thisOver as ParsedBall[]}
             horizontal
             showsHorizontalScrollIndicator={false}
-            keyExtractor={(_, index) => index.toString()} // use index as key (stable for fixed list)
+            keyExtractor={(_, index) => index.toString()}
             ItemSeparatorComponent={() => <View className="w-3" />}
             renderItem={({ item }) => {
               const isWicket = item.isWicket;
               const isExtra = item.extraType !== null;
               const isBoundary =
                 !isExtra && (item.batterRuns === 4 || item.batterRuns === 6);
-
               const displayText = formatBallResult(item);
+
+              console.log(item);
 
               return (
                 <View
                   className={`w-[46px] h-[46px] rounded-full items-center justify-center border
-          ${
-            isWicket
-              ? "bg-danger border-danger-dark"
-              : isBoundary
-                ? "bg-secondary border-secondary-700"
-                : isExtra
-                  ? "bg-warning border-warning-dark"
-                  : "bg-surface border-border-light"
-          }`}
+                    ${
+                      isWicket
+                        ? "bg-danger border-danger-dark"
+                        : isBoundary
+                          ? "bg-secondary border-secondary-700"
+                          : isExtra
+                            ? "bg-warning border-warning-dark"
+                            : "bg-surface border-border-light"
+                    }`}
                 >
                   <Text
                     className={`font-black text-base
-            ${
-              isWicket || isBoundary || isExtra
-                ? "text-text-inverse"
-                : "text-text-primary"
-            }`}
+                      ${
+                        isWicket || isBoundary || isExtra
+                          ? "text-text-inverse"
+                          : "text-text-primary"
+                      }`}
                   >
                     {displayText}
                   </Text>

@@ -1,9 +1,7 @@
-import { useScorecardStore } from "@/stores/useScorecardStore";
 import { useScoringStore } from "@/stores/useScoringStore";
 
 const handleCloseInnings = () => {
   const scoringState = useScoringStore.getState();
-  const scorecardState = useScorecardStore.getState();
 
   const currentInningsData =
     scoringState.currentInnings === 1
@@ -54,11 +52,4 @@ const handleCloseInnings = () => {
     id,
     name: scoringState.players[id]?.name ?? "Unknown",
   }));
-
-  scorecardState.closeInnings({
-    batsmen,
-    bowlers,
-    allTeamPlayerIds: battingTeam.playersIds,
-    allTeamPlayers,
-  });
 };
