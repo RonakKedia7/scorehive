@@ -7,7 +7,7 @@ const ScorecardHeader = () => {
   const router = useRouter();
 
   return (
-    <View className="flex-row items-center justify-between px-4 py-3 border-b border-border-light bg-surface">
+    <View className="flex-row items-center justify-between px-4 py-3 border border-border-light bg-surface">
       <Pressable
         onPress={() => router.back()}
         className="w-11 h-11 rounded-card items-center justify-center"

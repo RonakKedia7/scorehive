@@ -12,8 +12,8 @@ export type BallDetail = {
   isWicket: boolean;
   isLegal: boolean;
   wicketType?: string;
-  fielderId?: string; 
-  fielderName?: string; 
+  fielderId?: string;
+  fielderName?: string;
   batsmanOutId?: string;
   newBatsmanId?: string;
   facingStrikerId: string;
@@ -27,6 +27,7 @@ export type BallDetail = {
   facingNonStrikerName: string;
   bowlerName: string;
   newBatsmanName?: string;
+  dismissalString?: string;
 };
 
 export type BattingScorecardEntry = {
@@ -38,6 +39,7 @@ export type BattingScorecardEntry = {
   sixes: number;
   strikeRate: number;
   dismissal?: string;
+  dismissalType?: string;
   fielderIds?: string[];
 };
 

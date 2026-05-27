@@ -1,6 +1,7 @@
 import { View, Text } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import { useInnings } from "@/hooks/useInnings";
+import { formatBallResult, ParsedBall } from "@/utils/ballHelpers";
 
 const ScoreCard = () => {
   const { innings, currentInnings, teamA, teamB } = useInnings();
@@ -65,38 +66,41 @@ const ScoreCard = () => {
 
         <View className="h-[46px]">
           <FlashList
-            data={innings.thisOver}
+            data={innings.thisOver as ParsedBall[]} // ensure type
             horizontal
             showsHorizontalScrollIndicator={false}
-            keyExtractor={(item, index) => `${item}-${index}`}
+            keyExtractor={(_, index) => index.toString()} // use index as key (stable for fixed list)
             ItemSeparatorComponent={() => <View className="w-3" />}
             renderItem={({ item }) => {
-              const isWicket = /W$/.test(item) && !item.includes("Wd");
-              const isExtra = /wd|nb/i.test(item);
-              const isBoundary = /[46]$/.test(item) && !isExtra;
+              const isWicket = item.isWicket;
+              const isExtra = item.extraType !== null;
+              const isBoundary =
+                !isExtra && (item.batterRuns === 4 || item.batterRuns === 6);
+
+              const displayText = formatBallResult(item);
 
               return (
                 <View
                   className={`w-[46px] h-[46px] rounded-full items-center justify-center border
-                      ${
-                        isWicket
-                          ? "bg-danger border-danger-dark"
-                          : isBoundary
-                            ? "bg-secondary border-secondary-700"
-                            : isExtra
-                              ? "bg-warning border-warning-dark"
-                              : "bg-surface border-border-light"
-                      }`}
+          ${
+            isWicket
+              ? "bg-danger border-danger-dark"
+              : isBoundary
+                ? "bg-secondary border-secondary-700"
+                : isExtra
+                  ? "bg-warning border-warning-dark"
+                  : "bg-surface border-border-light"
+          }`}
                 >
                   <Text
                     className={`font-black text-base
-                        ${
-                          isWicket || isBoundary || isExtra
-                            ? "text-text-inverse"
-                            : "text-text-primary"
-                        }`}
+            ${
+              isWicket || isBoundary || isExtra
+                ? "text-text-inverse"
+                : "text-text-primary"
+            }`}
                   >
-                    {item}
+                    {displayText}
                   </Text>
                 </View>
               );

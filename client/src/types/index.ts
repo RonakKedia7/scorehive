@@ -1,3 +1,5 @@
+import { ParsedBall } from "@/utils/ballHelpers";
+
 export type OptedTo = "bat" | "bowl";
 
 export type MatchRules = {
@@ -72,6 +74,8 @@ export type PlayerMatchStats = {
     strikeRate: number;
     isOut: boolean;
     dismissalType?: string;
+    dismissal?: string;
+    fielderIds?: string[];
   };
 
   bowling: {
@@ -108,7 +112,7 @@ export type Innings = {
 
   extras: Extras;
 
-  thisOver: string[];
+  thisOver: ParsedBall[];
 };
 
 export type ScoringStore = {
@@ -159,6 +163,8 @@ export type ScoringStore = {
   setBowler: (playerId: string) => void;
 
   addPlayerToBattingTeam: (name: string) => string;
+
+  addPlayerToTeam: (teamKey: TeamKey, name: string) => string;
 
   resetScoringStore: () => void;
 };

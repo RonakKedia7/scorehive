@@ -8,6 +8,20 @@ import {
 } from "@/types/scorecard";
 import { MatchRules } from "@/types";
 
+// Helper: convert total balls to display overs (e.g., 13 balls → 2.1)
+const ballsToOvers = (totalBalls: number): number => {
+  const overs = Math.floor(totalBalls / 6);
+  const balls = totalBalls % 6;
+  return Number((overs + balls * 0.1).toFixed(1));
+};
+
+// Helper: convert display overs (e.g., 2.1) to total balls
+const oversToBalls = (displayOvers: number): number => {
+  const overs = Math.floor(displayOvers);
+  const balls = Math.round((displayOvers - overs) * 10);
+  return overs * 6 + balls;
+};
+
 interface ScorecardState {
   match: MatchScorecard | null;
 
@@ -38,8 +52,8 @@ interface ScorecardState {
     bowlers: Array<{
       playerId: string;
       name: string;
-      overs: number;
-      balls: number;
+      overs: number; // completed overs (e.g., 3)
+      balls: number; // balls in current over (0-5)
       maidens: number;
       runs: number;
       wickets: number;
@@ -102,8 +116,13 @@ export const useScorecardStore = create<ScorecardState>((set, get) => ({
       const ballWithIndex = { ...ballDetail, ballIndex: innings.balls.length };
       const updatedBalls = [...innings.balls, ballWithIndex];
 
-      const formatOvers = (overs: number) =>
-        `${Math.floor(overs)}.${Math.round((overs - Math.floor(overs)) * 10)}`;
+      // Current total balls in innings (legal deliveries)
+      const currentTotalBalls = oversToBalls(innings.totalOvers);
+      let newTotalBalls = currentTotalBalls;
+      if (ballDetail.isLegal) {
+        newTotalBalls = currentTotalBalls + 1;
+      }
+      const newTotalOvers = ballsToOvers(newTotalBalls);
 
       let partnership = innings.currentPartnership + ballDetail.runs;
 
@@ -131,8 +150,6 @@ export const useScorecardStore = create<ScorecardState>((set, get) => ({
       strikerEntry.runs += ballDetail.batterRuns;
       if (ballDetail.batterRuns === 4) strikerEntry.fours += 1;
       if (ballDetail.batterRuns === 6) strikerEntry.sixes += 1;
-
-      // ✅ Strike rate rounded to 2 decimals
       strikerEntry.strikeRate =
         strikerEntry.balls > 0
           ? Number(((strikerEntry.runs / strikerEntry.balls) * 100).toFixed(2))
@@ -141,11 +158,12 @@ export const useScorecardStore = create<ScorecardState>((set, get) => ({
       // --- Fall of wicket & dismissal ---
       let fallOfWickets = [...innings.fallOfWickets];
       if (ballDetail.isWicket) {
-        strikerEntry.dismissal = ballDetail.wicketType ?? "out";
+        strikerEntry.dismissal =
+          ballDetail.dismissalString ?? ballDetail.wicketType ?? "out";
 
         const newTotalRuns = innings.totalRuns + ballDetail.runs;
         const newWickets = innings.wickets + 1;
-        const oversAt = formatOvers(innings.totalOvers);
+        const oversAt = newTotalOvers.toFixed(1); // e.g. "5.3"
         fallOfWickets.push({
           wicketNumber: newWickets,
           runsAt: newTotalRuns,
@@ -192,10 +210,9 @@ export const useScorecardStore = create<ScorecardState>((set, get) => ({
       if (ballDetail.isLegal) {
         bowlerEntry.legalBalls += 1;
         const totalBalls = bowlerEntry.legalBalls;
-        const completedOvers = Math.floor(totalBalls / 6);
-        const remainingBalls = totalBalls % 6;
-        // Keep overs in display format (e.g., 1.1)
-        bowlerEntry.overs = completedOvers + remainingBalls * 0.1;
+        bowlerEntry.overs = Math.floor(totalBalls / 6);
+        // Display overs stored separately? We'll keep overs as decimal for convenience
+        // But for final closeInnings we'll use overs+balls.
       }
 
       if (ballDetail.isBowlerWicket) {
@@ -233,20 +250,6 @@ export const useScorecardStore = create<ScorecardState>((set, get) => ({
         }
       }
 
-      let newTotalOvers = innings.totalOvers;
-      if (ballDetail.isLegal) {
-        const currentOvers = Math.floor(innings.totalOvers);
-        const currentBalls = Math.round(
-          (innings.totalOvers - currentOvers) * 10,
-        );
-        let newBalls = currentBalls + 1;
-        if (newBalls === 6) {
-          newTotalOvers = currentOvers + 1;
-        } else {
-          newTotalOvers = currentOvers + newBalls * 0.1;
-        }
-      }
-
       const updatedInnings: InningsScorecard = {
         ...innings,
         balls: updatedBalls,
@@ -277,7 +280,6 @@ export const useScorecardStore = create<ScorecardState>((set, get) => ({
       // --- Batsmen: overwrite with final data + DNB ---
       const battedIds = params.batsmen.map((b) => b.playerId);
 
-      // Update existing batsmen entries
       let finalBatsmen: BattingScorecardEntry[] = innings.batsmen.map(
         (existing) => {
           const updated = params.batsmen.find(
@@ -292,7 +294,7 @@ export const useScorecardStore = create<ScorecardState>((set, get) => ({
               fours: updated.fours,
               sixes: updated.sixes,
               strikeRate: updated.strikeRate,
-              dismissal: existing.dismissal, // Keep existing dismissal info
+              dismissal: existing.dismissal,
             };
           }
           return existing;
@@ -312,7 +314,7 @@ export const useScorecardStore = create<ScorecardState>((set, get) => ({
               fours: 0,
               sixes: 0,
               strikeRate: 0,
-              dismissal: undefined, // DNB
+              dismissal: undefined,
             });
           }
         }
@@ -325,15 +327,17 @@ export const useScorecardStore = create<ScorecardState>((set, get) => ({
             (b) => b.playerId === existing.playerId,
           );
           if (updated) {
+            // Convert overs (integer) + balls (0-5) to display overs (e.g., 3.4)
+            const displayOvers = updated.overs + updated.balls * 0.1;
             return {
               ...existing,
               name: updated.name,
-              overs: updated.overs + updated.balls / 10,
+              overs: displayOvers,
               maidens: updated.maidens,
               runs: updated.runs,
               wickets: updated.wickets,
               economy: updated.economy,
-              legalBalls: updated.balls + updated.overs * 6,
+              legalBalls: updated.overs * 6 + updated.balls,
             };
           }
           return existing;

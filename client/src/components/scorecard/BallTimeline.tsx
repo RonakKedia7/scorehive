@@ -75,7 +75,14 @@ const BallTimeline = ({ innings }: { innings: InningsScorecard }) => {
                         : "bg-surfaceSecondary border-border-light"
                 }`}
                     >
-                      <Text className="text-white font-black text-sm">
+                      <Text
+                        className={`font-black text-base
+            ${
+              isWicket || isBoundary || isExtra
+                ? "text-text-inverse"
+                : "text-text-primary"
+            }`}
+                      >
                         {displayText}
                       </Text>
                     </View>

@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { MatchRules, ScoringStore } from "@/types";
+import { MatchRules, Player, ScoringStore } from "@/types";
 import { initializeMatch as initMatch } from "@/utils/initializeMatch";
 import { addBall as addBallLogic } from "@/utils/addBall";
 import { createEmptyInnings, createPlayer } from "@/utils/helperFunctions";
@@ -28,6 +28,10 @@ const initialState = {
   maxOvers: 0,
 };
 
+// Simple ID generator (or import from utils)
+const generateId = () =>
+  Date.now().toString() + Math.random().toString(36).substring(2, 8);
+
 export const useScoringStore = create<ScoringStore>((set, get) => ({
   ...initialState,
 
@@ -36,7 +40,7 @@ export const useScoringStore = create<ScoringStore>((set, get) => ({
       const matchState = initMatch({ ...params, state });
       return {
         ...matchState,
-        maxOvers: params.maxOvers, // store the limit
+        maxOvers: params.maxOvers,
       };
     }),
 
@@ -48,7 +52,6 @@ export const useScoringStore = create<ScoringStore>((set, get) => ({
         overComplete,
       } = addBallLogic(state, ballResult, options);
 
-      // Update scorecard store (safe, no cycle)
       useScorecardStore.getState().recordBall(ballDetail);
 
       return {
@@ -64,9 +67,8 @@ export const useScoringStore = create<ScoringStore>((set, get) => ({
 
       const inningsKey = state.currentInnings === 1 ? "innings1" : "innings2";
       const innings = state[inningsKey];
-      const bowlingTeamKey = innings.bowlingTeam!; // "teamA" or "teamB"
+      const bowlingTeamKey = innings.bowlingTeam!;
 
-      // Add new bowler to the bowling team's playersIds
       const team = { ...state[bowlingTeamKey] };
       if (!team.playersIds.includes(newBowler.id)) {
         team.playersIds = [...team.playersIds, newBowler.id];
@@ -113,6 +115,25 @@ export const useScoringStore = create<ScoringStore>((set, get) => ({
       return {
         players,
         [battingTeamKey]: team,
+      };
+    });
+    return newPlayer.id;
+  },
+
+  addPlayerToTeam: (teamKey: "teamA" | "teamB", name: string) => {
+    // Reuse createPlayer to ensure consistent stats
+    const newPlayer = createPlayer(name);
+    set((state) => {
+      const players = { ...state.players, [newPlayer.id]: newPlayer };
+      const team = { ...state[teamKey] };
+
+      if (!team.playersIds.includes(newPlayer.id)) {
+        team.playersIds = [...team.playersIds, newPlayer.id];
+      }
+
+      return {
+        players,
+        [teamKey]: team,
       };
     });
     return newPlayer.id;
