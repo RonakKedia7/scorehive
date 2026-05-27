@@ -57,6 +57,12 @@ export default function RootLayout() {
             animation: "none",
           }}
         />
+        <Stack.Screen
+          name="wicket"
+          options={{
+            animation: "none",
+          }}
+        />
       </Stack>
     </View>
   );

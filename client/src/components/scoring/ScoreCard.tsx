@@ -71,9 +71,9 @@ const ScoreCard = () => {
             keyExtractor={(item, index) => `${item}-${index}`}
             ItemSeparatorComponent={() => <View className="w-3" />}
             renderItem={({ item }) => {
-              const isWicket = item === "W";
-              const isBoundary = item === "4" || item === "6";
-              const isExtra = item.includes("Wd") || item.includes("Nb");
+              const isWicket = /W$/.test(item) && !item.includes("Wd");
+              const isExtra = /wd|nb/i.test(item);
+              const isBoundary = /[46]$/.test(item) && !isExtra;
 
               return (
                 <View

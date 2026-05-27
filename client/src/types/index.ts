@@ -150,12 +150,15 @@ export type ScoringStore = {
       wicketType?: string;
       newBatsmanName?: string;
       didBattersCross?: boolean;
+      outType?: "striker" | "nonStriker";
     },
   ) => void;
 
   startNewOverWithBowler: (bowlerName: string) => void;
 
   setBowler: (playerId: string) => void;
+
+  addPlayerToBattingTeam: (name: string) => string;
 
   resetScoringStore: () => void;
 };

@@ -1,6 +1,7 @@
 import { View, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/constants/colors";
+import { router } from "expo-router";
 
 const Header = () => {
   return (
@@ -20,6 +21,7 @@ const Header = () => {
           opacity: pressed ? 0.8 : 1,
           transform: [{ scale: pressed ? 0.96 : 1 }],
         })}
+        onPress={() => router.push("/scorecard")}
         className="w-10 h-10 rounded-full bg-primary-500 items-center justify-center shadow-card-sm"
       >
         <Ionicons name="stats-chart" size={18} color={Colors.text.inverse} />

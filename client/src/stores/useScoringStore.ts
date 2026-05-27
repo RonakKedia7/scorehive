@@ -97,5 +97,26 @@ export const useScoringStore = create<ScoringStore>((set, get) => ({
       };
     }),
 
+  addPlayerToBattingTeam: (name: string) => {
+    const newPlayer = createPlayer(name);
+    set((state) => {
+      const players = { ...state.players, [newPlayer.id]: newPlayer };
+      const inningsKey = state.currentInnings === 1 ? "innings1" : "innings2";
+      const innings = state[inningsKey];
+      const battingTeamKey = innings.battingTeam!;
+      const team = { ...state[battingTeamKey] };
+
+      if (!team.playersIds.includes(newPlayer.id)) {
+        team.playersIds = [...team.playersIds, newPlayer.id];
+      }
+
+      return {
+        players,
+        [battingTeamKey]: team,
+      };
+    });
+    return newPlayer.id;
+  },
+
   resetScoringStore: () => set({ ...initialState }),
 }));

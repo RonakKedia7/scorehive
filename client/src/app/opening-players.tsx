@@ -60,10 +60,10 @@ const OpeningPlayersScreen = () => {
   return (
     <SafeAreaView className="flex-1 bg-background p-5">
       {/* HEADER */}
-      <View className="mb-4 flex-row items-center justify-between">
+      <View className="mb-4 flex-row gap-2 items-center justify-between">
         <Pressable
           onPress={() => router.back()}
-          className="rounded-xl bg-surface p-3 active:bg-background"
+          className="rounded-xl p-3 active:bg-background"
           style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
         >
           <Ionicons name="arrow-back" size={24} color={Colors.text.primary} />

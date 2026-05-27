@@ -102,7 +102,8 @@ interface AddBallOptions {
   newBatsmanId?: string;
   wicketType?: string;
   newBatsmanName?: string;
-  didBattersCross?: boolean; // for run-out logic
+  didBattersCross?: boolean;
+  outType?: "striker" | "nonStriker";
 }
 
 export function addBall(
@@ -114,13 +115,16 @@ export function addBall(
   ballDetail: BallDetail;
   overComplete: boolean;
 } {
-  const { newBatsmanId, wicketType, newBatsmanName, didBattersCross } = options;
+  const { newBatsmanId, wicketType, newBatsmanName, didBattersCross, outType } =
+    options;
   const { matchRules } = state;
 
   const parsed = parseBallResult(ballResult);
 
   let overCompleteFlag = false;
   let overRunsValue = 0;
+
+  let batsmanOutId: string | undefined;
 
   // Enforce match rules
   if (parsed.extraType === "noBall" && !matchRules.noBall.enabled) {
@@ -159,9 +163,11 @@ export function addBall(
   // ---------- INNINGS OVERFLOW GUARD ----------
   const battingTeamKey = innings.battingTeam;
   const battingTeam = battingTeamKey === "teamA" ? state.teamA : state.teamB;
-  const maxWickets = battingTeam.playersIds.length - 1; // all out when this many fall
+  const maxWickets = parseInt(state.matchRules.playersPerTeam, 10) - 1;
 
-  if (innings.wickets >= maxWickets) {
+  const potentialWickets = innings.wickets + (parsed.isWicket ? 1 : 0);
+
+  if (potentialWickets > maxWickets) {
     throw new Error("Innings complete: all out");
   }
 
@@ -250,20 +256,46 @@ export function addBall(
       if (didBattersCross === undefined) {
         throw new Error("didBattersCross must be provided for run out");
       }
+      const outIsStriker = outType === "striker" || outType === undefined; // default striker out
+      const batsmanOutId = outIsStriker ? strikerId : nonStrikerId;
+
+      if (outIsStriker) {
+        striker.stats.batting.isOut = true;
+        striker.stats.batting.dismissalType = wicketType;
+      } else {
+        nonStriker.stats.batting.isOut = true;
+        nonStriker.stats.batting.dismissalType = wicketType;
+      }
+
       if (!isAllOut) {
         const nextBatsman = newBatsmanId as string;
-        if (didBattersCross) {
-          strikerId = nonStrikerId;
-          nonStrikerId = nextBatsman;
+        if (outIsStriker) {
+          if (didBattersCross) {
+            strikerId = nonStrikerId;
+            nonStrikerId = nextBatsman;
+          } else {
+            strikerId = nextBatsman;
+          }
         } else {
-          strikerId = nextBatsman;
+          // Non-striker run out
+          if (didBattersCross) {
+            // The striker crossed, so they stay at striker's end, new batsman takes non-striker's end
+            nonStrikerId = nextBatsman;
+            // strikerId unchanged
+          } else {
+            // No crossing – striker stays, new batsman replaces non-striker
+            nonStrikerId = nextBatsman;
+          }
         }
       } else {
         strikerId = "";
         nonStrikerId = "";
       }
     } else {
-      // Bowler wicket
+      batsmanOutId = strikerId;
+      striker.stats.batting.isOut = true;
+      striker.stats.batting.dismissalType = wicketType ?? "unknown";
+
       if (!isAllOut) {
         strikerId = newBatsmanId as string;
       } else {
@@ -273,6 +305,7 @@ export function addBall(
       bowler.stats.bowling.wickets += 1;
     }
   }
+
   // --- Bowler stats ---
   const bowlerRuns = bowlerRunsConceded(parsed);
   bowler.stats.bowling.runs += bowlerRuns;
@@ -368,7 +401,7 @@ export function addBall(
     isWicket: parsed.isWicket,
     isLegal: parsed.isLegal,
     wicketType: wicketType,
-    batsmanOutId: parsed.isWicket ? striker.id : undefined,
+    batsmanOutId: parsed.isWicket ? batsmanOutId : undefined,
     newBatsmanId: parsed.isWicket ? newBatsmanId : undefined,
     newBatsmanName: parsed.isWicket ? newBatsmanName : undefined,
     facingStrikerId: striker.id, // the batter who faced the ball (original striker)

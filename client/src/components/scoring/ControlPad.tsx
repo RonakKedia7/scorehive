@@ -62,6 +62,10 @@ const ControlPad = () => {
     addBall(`${runs}${extrasCode}`);
   };
 
+  const handleWicketClick = () => {
+    if (guardOverCompleted()) return;
+    router.push("/wicket");
+  };
   const handleUndo = () => {};
 
   return (
@@ -154,6 +158,7 @@ const ControlPad = () => {
 
           {/* WICKET */}
           <Pressable
+            onPress={handleWicketClick}
             style={({ pressed }) => ({
               opacity: pressed ? 0.8 : 1,
               transform: [{ scale: pressed ? 0.96 : 1 }],

@@ -11,7 +11,9 @@ export type BallDetail = {
   extraType: "wide" | "noBall" | "bye" | "legBye" | null;
   isWicket: boolean;
   isLegal: boolean;
-  wicketType?: string; // e.g. "c Smith b Johnson" or "run out (Smith)"
+  wicketType?: string;
+  fielderId?: string; 
+  fielderName?: string; 
   batsmanOutId?: string;
   newBatsmanId?: string;
   facingStrikerId: string;
